@@ -294,9 +294,26 @@ await fixAllWikiLinks('./wiki', { format: 'local' });
 |------|------|---------|
 | [README.md](./README.md) | 项目概述与快速开始 | 所有人 |
 | [SKILL.md](./SKILL.md) | 完整功能说明与API | 开发者 |
-| [IMPLEMENTATION_GUIDE.md](./IMPLEMENTATION_GUIDE.md) | 技术实现详细指南 | LLM/Agent开发者 |
-| [COZE_AGENT_GUIDE.md](./COZE_AGENT_GUIDE.md) | 扣子环境适配指南 | 扣子智能体开发者 |
+| [IMPLEMENTATION_GUIDE.md](./IMPLEMENTATION_GUIDE.md) | OpenClaw+飞书环境实现指南 | OpenClaw/飞书开发者 |
+| [COZE_AGENT_GUIDE.md](./COZE_AGENT_GUIDE.md) | 扣子智能体环境实现指南 | 扣子开发者 |
 | [UPDATE_LOG.md](./UPDATE_LOG.md) | 更新日志 | 维护者 |
+
+### 如何选择合适的指南？
+
+**根据你的环境选择**：
+
+| 你的环境 | 推荐指南 | 原因 |
+|---------|---------|------|
+| **OpenClaw + 飞书 Wiki** | [IMPLEMENTATION_GUIDE.md](./IMPLEMENTATION_GUIDE.md) | 详细说明如何使用飞书API，包括feishu_create_doc、feishu_wiki_space_node等调用方式 |
+| **扣子智能体** | [COZE_AGENT_GUIDE.md](./COZE_AGENT_GUIDE.md) | 详细说明如何使用本地文件系统，纯本地运行，无需飞书权限 |
+
+**根据你的目的选择**：
+
+| 你的目的 | 推荐指南 | 内容 |
+|---------|---------|------|
+| **快速了解项目** | [README.md](./README.md)（本页） | 核心逻辑、安装方式、快速开始 |
+| **复现/移植功能** | [IMPLEMENTATION_GUIDE.md](./IMPLEMENTATION_GUIDE.md) 或 [COZE_AGENT_GUIDE.md](./COZE_AGENT_GUIDE.md) | 完整的代码实现、模块说明、配置细节 |
+| **查看API参考** | [SKILL.md](./SKILL.md) | 所有工具、参数、返回值说明 |
 
 ---
 
