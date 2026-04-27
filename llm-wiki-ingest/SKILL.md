@@ -39,6 +39,11 @@ LLM-wiki (空间)
 **处理流程**:
 1. 摄取文档 → 2. 主题分析 → 3. 更新主题页 → 4. 更新实体页 → 5. 创建归档页 → 6. 更新系统索引 → 7. 建立父子层级关系
 
+**链接格式说明**:
+- 飞书 Wiki 使用标准 Markdown 链接格式: `[显示文本](https://www.feishu.cn/wiki/{node_token})`
+- 本地 Wiki 可使用 `[[页面名]]` 语法，但同步到飞书时需要转换为标准 URL 格式
+- 获取 node_token: 创建页面后从 feishu_create_doc 返回结果中获取
+
 ## Ingest Workflow
 
 ### Step 1: List Pending Documents
@@ -87,7 +92,7 @@ For each identified topic, update the corresponding topic page:
 1. **Increment document count**
 2. **Add to "📦 来源文档" section**:
    ```markdown
-   - [[归档文档/{Document Title}]] - {一句话摘要}
+   - [{Document Title}](https://www.feishu.cn/wiki/{node_token}) - {一句话摘要}
    ```
 3. **Update "🔗 关键实体" table** if new entities found
 4. **Append to "📚 知识点" section**:
@@ -104,11 +109,11 @@ For each entity mentioned in the document:
 1. **Update "最后更新时间"**
 2. **Add to "📦 来源" section**:
    ```markdown
-   - [[归档文档/{Document Title}]] - {brief description}
+   - [{Document Title}](https://www.feishu.cn/wiki/{node_token}) - {brief description}
    ```
 3. **Add to "📚 相关主题" section**:
    ```markdown
-   - [[主题聚合/{Topic Name}]]
+   - [{Topic Name}](https://www.feishu.cn/wiki/{node_token})
    ```
 4. If entity doesn't exist, create new entity page
 
@@ -125,15 +130,15 @@ Create a new page in archive section and sync to Feishu Wiki:
 **摄取时间**: {YYYY-MM-DD HH:mm}
 **原始来源**: [飞书链接]({feishu_url})
 **文档类型**: {docx/bitable/sheet}
-**所属主题**: [[{Primary Topic}]]
+**所属主题**: [{Primary Topic}](https://www.feishu.cn/wiki/{node_token})
 
 ## 📋 核心摘要
 
 {2-3 paragraphs summary}
 
 ## 🔗 生成的实体
-- [[{Entity1}]]
-- [[{Entity2}]]
+- [{Entity1}](https://www.feishu.cn/wiki/{node_token})
+- [{Entity2}](https://www.feishu.cn/wiki/{node_token})
 
 ## 📚 知识点
 - Point 1
@@ -193,8 +198,8 @@ Add entry to `wiki/system/log.md`:
 - 来源: {Feishu link}
 - 处理时间: {HH:mm:ss}
 - 识别主题: {Primary Topic}
-- 生成/更新实体: [[{Entity1}]], [[{Entity2}]]
-- 创建归档页: [[{Document Title}]] (已同步到飞书)
+- 生成/更新实体: [{Entity1}](https://www.feishu.cn/wiki/{node_token}), [{Entity2}](https://www.feishu.cn/wiki/{node_token})
+- 创建归档页: [{Document Title}](https://www.feishu.cn/wiki/{node_token}) (已同步到飞书)
 ```
 
 ### Step 9: Archive Source Document
@@ -332,7 +337,7 @@ Location: `wiki/topics/{topic-name}.md`
 
 | 实体 | 类型 | 一句话定义 |
 |------|------|-----------|
-| [[{Entity}]] | {type} | {definition} |
+| [{Entity}](https://www.feishu.cn/wiki/{node_token}) | {type} | {definition} |
 
 ---
 
@@ -345,8 +350,8 @@ Location: `wiki/topics/{topic-name}.md`
 
 ## 📦 来源文档
 
-- [[{Doc1}]] - {summary}
-- [[{Doc2}]] - {summary}
+- [{Doc1}](https://www.feishu.cn/wiki/{node_token}) - {summary}
+- [{Doc2}](https://www.feishu.cn/wiki/{node_token}) - {summary}
 
 ---
 
@@ -372,15 +377,15 @@ Location: `wiki/entities/{entity-name}.md`
 {Detailed description}
 
 ## 📚 相关主题
-- [[{Topic1}]]
-- [[{Topic2}]]
+- [{Topic1}](https://www.feishu.cn/wiki/{node_token})
+- [{Topic2}](https://www.feishu.cn/wiki/{node_token})
 
 ## 📦 来源
-- [[{Doc1}]] - {description}
-- [[{Doc2}]] - {description}
+- [{Doc1}](https://www.feishu.cn/wiki/{node_token}) - {description}
+- [{Doc2}](https://www.feishu.cn/wiki/{node_token}) - {description}
 
 ## 🔗 相关实体
-- [[{RelatedEntity}]] - {relationship}
+- [{RelatedEntity}](https://www.feishu.cn/wiki/{node_token}) - {relationship}
 ```
 
 ### Archive Document Page Template
@@ -393,15 +398,15 @@ Location: `wiki/archive/{document-title}.md`
 **摄取时间**: {YYYY-MM-DD HH:mm}
 **原始来源**: [飞书链接]({url})
 **文档类型**: {docx/bitable/sheet}
-**所属主题**: [[{Topic}]]
+**所属主题**: [{Topic}](https://www.feishu.cn/wiki/{node_token})
 
 ## 📋 核心摘要
 
 {Summary}
 
 ## 🔗 生成的实体
-- [[{Entity1}]]
-- [[{Entity2}]]
+- [{Entity1}](https://www.feishu.cn/wiki/{node_token})
+- [{Entity2}](https://www.feishu.cn/wiki/{node_token})
 
 ## 📚 知识点
 {Key points}
@@ -430,17 +435,17 @@ Location: `wiki/system/index.md`
 ## 📚 主题清单
 | 主题 | 文档数 | 实体数 |
 |------|--------|--------|
-| [[主题聚合/{Topic}]] | {n} | {n} |
+| [{Topic}](https://www.feishu.cn/wiki/{node_token}) | {n} | {n} |
 
 ## 🏷️ 实体清单
 | 实体 | 类型 | 所属主题 |
 |------|------|----------|
-| [[{Entity}]] | {type} | {Topic1}, {Topic2} |
+| [{Entity}](https://www.feishu.cn/wiki/{node_token}) | {type} | {Topic1}, {Topic2} |
 
 ## 📦 归档文档
 | 文档 | 时间 | 主题 |
 |------|------|------|
-| [[归档文档/{Doc}]] | {date} | {topic} |
+| [{Doc}](https://www.feishu.cn/wiki/{node_token}) | {date} | {topic} |
 ```
 
 ## Topic Classification Algorithm
