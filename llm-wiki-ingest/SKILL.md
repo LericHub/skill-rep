@@ -5,11 +5,20 @@ description: Automates the ingestion of documents from Feishu "待处理" folder
 
 # LLM Wiki Ingest
 
-Automatically ingest documents from Feishu "待处理" folder and generate structured Wiki pages.
+Automatically ingest documents from Feishu "待处理" folder and generate structured Wiki pages with topic-based organization.
 
 ## Overview
 
-This skill automates the complete document ingestion workflow for LLM Wiki: downloading documents from Feishu, generating Wiki summaries, extracting entities and concepts, updating the index, archiving processed documents, and syncing everything back to Feishu Wiki space.
+This skill automates the complete document ingestion workflow for LLM Wiki with the new topic-based architecture:
+
+**知识库结构**:
+- 📚 **主题聚合页** (Topics) - 按查询场景组织，每个主题包含相关实体和知识点
+- 🏷️ **实体百科** (Entities) - 原子化实体定义，供主题页引用
+- 📦 **归档文档** (Archive) - 已摄取的原始文档完整内容
+- 🔧 **系统** (System) - 索引和日志
+
+**处理流程**:
+1. 摄取文档 → 2. 主题分析 → 3. 更新主题页 → 4. 更新实体页 → 5. 创建归档页 → 6. 更新系统索引
 
 ## Ingest Workflow
 
@@ -32,58 +41,134 @@ For each document in the pending folder:
 2. Save as markdown using Feishu document ID as filename
 3. Document formats supported: docx, doc, bitable, sheet
 
-### Step 3: Analyze and Generate Wiki Pages
+### Step 3: Analyze and Classify Topic
 
 For each downloaded document:
 
-1. Read document content
-2. Generate source summary page in `wiki/sources/` following template:
-   - Title, source link, ingestion time, document type
-   - Core summary (2-3 paragraphs)
-   - Key points
-   - Entity mentions
-   - Concept associations
-   - Data/metrics
-   - Open questions
+1. **Read document content**
+2. **Analyze topic classification** using rules below
+3. **Identify primary topic** (Agent架构 / 可观测性 / 前后端协作)
+4. **Extract secondary topics** if applicable
 
-3. Extract entities mentioned in document
-4. Extract concepts mentioned in document
-5. Create or update entity pages in `wiki/entities/`
-6. Create or update concept pages in `wiki/concepts/`
+**Topic Classification Rules**:
 
-### Step 4: Update Index
+| 主题 | 关键词 | 示例 |
+|------|--------|------|
+| **Agent 架构体系** | 星形架构, Main Agent, Sub Agent, 多Agent, 协作, 调度, LangGraph | 动态星形多Agent架构部署方案 |
+| **可观测性与追踪** | LangSmith, 追踪, 监控, 可观测性, ProjectID, TraceID, RunID, 链路 | MeowBot 接入 LangSmith |
+| **前后端协作规范** | Stream, 前后端, 事件流, 状态流, SSE, WebSocket, 协作规范 | DeepAgents Stream状态流及前后端对接 |
 
-Update `wiki/index.md`:
+### Step 4: Update Topic Aggregation Pages
 
-- Increment source page count
-- Add new source page to "来源页面" section
-- Update timestamp
+For each identified topic, update the corresponding topic page:
 
-### Step 5: Record Log
+**Location**: `wiki/topics/{topic-name}.md`
 
-Add entry to `wiki/log.md`:
+**Update actions**:
+1. **Increment document count**
+2. **Add to "📦 来源文档" section**:
+   ```markdown
+   - [[归档文档/{Document Title}]] - {一句话摘要}
+   ```
+3. **Update "🔗 关键实体" table** if new entities found
+4. **Append to "📚 知识点" section**:
+   - Extract 2-3 key points from document
+   - Add as bullet points with brief explanation
+
+### Step 5: Update Entity Pages
+
+For each entity mentioned in the document:
+
+**Location**: `wiki/entities/{entity-name}.md`
+
+**Update actions**:
+1. **Update "最后更新时间"**
+2. **Add to "📦 来源" section**:
+   ```markdown
+   - [[归档文档/{Document Title}]] - {brief description}
+   ```
+3. **Add to "📚 相关主题" section**:
+   ```markdown
+   - [[主题聚合/{Topic Name}]]
+   ```
+4. If entity doesn't exist, create new entity page
+
+### Step 6: Create Archive Document Page
+
+Create a new page in archive section:
+
+**Location**: `wiki/archive/{document-title}.md`
+
+**Content**:
+```markdown
+# {Document Title}
+
+**摄取时间**: {YYYY-MM-DD HH:mm}
+**原始来源**: [飞书链接]({feishu_url})
+**文档类型**: {docx/bitable/sheet}
+**所属主题**: [[主题聚合/{Primary Topic}]]
+
+## 📋 核心摘要
+
+{2-3 paragraphs summary}
+
+## 🔗 生成的实体
+- [[Entity1]]
+- [[Entity2]]
+
+## 📚 知识点
+- Point 1
+- Point 2
+
+## 📄 完整内容
+{Full document content}
+```
+
+### Step 7: Update System Index
+
+Update `wiki/system/index.md`:
+
+**Actions**:
+1. **Increment counters**:
+   - Total documents
+   - Documents per topic
+   - Total entities
+2. **Add to entity-topic mapping table**:
+   ```markdown
+   | {Entity} | {Topic1}, {Topic2} |
+   ```
+3. **Add to archive document list**:
+   ```markdown
+   | {Document} | {Date} | {Topic} |
+   ```
+
+### Step 8: Record Log
+
+Add entry to `wiki/system/log.md`:
 
 ```markdown
 ## [{YYYY-MM-DD HH:mm}] ingest | {Document Title}
 
 - 来源: {Feishu link}
 - 处理时间: {HH:mm:ss}
-- 新增页面: [[Source]], [[Entity1]], [[Concept1]]
+- 识别主题: {Primary Topic}
+- 生成/更新实体: [[Entity1]], [[Entity2]]
+- 创建归档页: [[归档文档/{Document Title}]]
 ```
 
-### Step 6: Archive Documents
+### Step 9: Archive Source Document
 
 Move processed documents from `待处理/` to `已归档/` folder:
 
 - Archive folder token: `FzubfNFlIlgFSDdVdE4coKCbnYg`
 - Keep original filenames
 
-### Step 7: Sync to Feishu Wiki (Optional)
+### Step 10: Sync to Feishu Wiki
 
 Sync updated Wiki to Feishu Wiki space:
 
 - Wiki space ID: `7633348949482589405`
-- Sync wiki/ and raw/ directories
+- Create/update pages in corresponding sections
 - Or wait for hourly scheduled sync
 
 ## Configuration
@@ -95,61 +180,74 @@ Sync updated Wiki to Feishu Wiki space:
 
 **Local Paths**:
 - Root: `/workspace/projects/workspace/llm-wiki`
+- Topics: `/workspace/projects/workspace/llm-wiki/wiki/topics`
+- Entities: `/workspace/projects/workspace/llm-wiki/wiki/entities`
+- Archive: `/workspace/projects/workspace/llm-wiki/wiki/archive`
+- System: `/workspace/projects/workspace/llm-wiki/wiki/system`
 - Raw: `/workspace/projects/workspace/llm-wiki/raw`
-- Wiki: `/workspace/projects/workspace/llm-wiki/wiki`
-- Scripts: `/workspace/projects/workspace/llm-wiki/scripts`
+
+**Existing Topics**:
+1. Agent 架构体系 - 星形架构、多Agent协作
+2. 可观测性与追踪 - LangSmith、链路追踪
+3. 前后端协作规范 - Stream、事件流、协作规范
 
 ## Page Templates
 
-### Source Page Template
+### Topic Aggregation Page Template
 
-Location: `wiki/sources/{title}.md`
+Location: `wiki/topics/{topic-name}.md`
 
 ```markdown
-# {Document Title}
+# {Topic Name}
 
-**来源**: {Feishu link}
-**摄取时间**: {YYYY-MM-DD HH:mm}
-**文档类型**: {docx/bitable/sheet}
+**最后更新**: {YYYY-MM-DD}
+**文档数**: {count}
+**实体数**: {count}
 
-## 📋 核心摘要
+---
 
-{2-3 paragraphs}
+## 📝 核心概念摘要
 
-## 🔑 关键要点
+{200-300字主题概述，给LLM快速理解}
 
-- Point 1
-- Point 2
+---
 
-## 🏷️ 实体提及
+## 🔗 关键实体
 
-- [[Entity1]]
-- [[Entity2]]
+| 实体 | 类型 | 一句话定义 |
+|------|------|-----------|
+| [[{Entity}]] | {type} | {definition} |
 
-## 💭 概念关联
+---
 
-- [[Concept1]]
-- [[Concept2]]
+## 📚 知识点
 
-## 📊 数据/指标
+### {Date} - {Document Title}
+{Key points extracted from document}
 
-- Metric1: {value}
-- Metric2: {value}
+---
 
-## ❓ 开放问题
+## 📦 来源文档
 
-1. Question 1
-2. Question 2
+- [[归档文档/{Doc1}]] - {summary}
+- [[归档文档/{Doc2}]] - {summary}
+
+---
+
+## 🎯 快速查询
+
+**问**: "{common question}?"  
+**答**: 见本文档"{section}"部分
 ```
 
 ### Entity Page Template
 
-Location: `wiki/entities/{name}.md`
+Location: `wiki/entities/{entity-name}.md`
 
 ```markdown
 # {Entity Name}
 
-**实体类型**: {人/公司/产品/项目}
+**实体类型**: {framework/tool/concept/component}
 **创建时间**: {YYYY-MM-DD}
 **最后更新**: {YYYY-MM-DD}
 
@@ -157,44 +255,116 @@ Location: `wiki/entities/{name}.md`
 
 {Detailed description}
 
-## 📚 信息来源
+## 📚 相关主题
+- [[主题聚合/{Topic1}]]
+- [[主题聚合/{Topic2}]]
 
-- [[Source1]]
-- [[Source2]]
+## 📦 来源
+- [[归档文档/{Doc1}]] - {description}
+- [[归档文档/{Doc2}]] - {description}
 
 ## 🔗 相关实体
-
-- [[RelatedEntity]] - {relationship}
+- [[{RelatedEntity}]] - {relationship}
 ```
 
-### Concept Page Template
+### Archive Document Page Template
 
-Location: `wiki/concepts/{name}.md`
+Location: `wiki/archive/{document-title}.md`
 
 ```markdown
-# {Concept Name}
+# {Document Title}
 
-**概念类型**: {理论/方法/框架/技术}
-**创建时间**: {YYYY-MM-DD}
-**最后更新**: {YYYY-MM-DD}
+**摄取时间**: {YYYY-MM-DD HH:mm}
+**原始来源**: [飞书链接]({url})
+**文档类型**: {docx/bitable/sheet}
+**所属主题**: [[主题聚合/{Topic}]]
 
-## 📖 定义
+## 📋 核心摘要
 
-{Definition}
+{Summary}
 
-## 💡 核心思想
+## 🔗 生成的实体
+- [[{Entity1}]]
+- [[{Entity2}]]
 
-{Core idea}
+## 📚 知识点
+{Key points}
 
-## 📚 理论基础
+## 📄 完整内容
+{Full content}
+```
 
-- [[Source1]]
-- [[Source2]]
+### System Index Page Template
 
-## 🔬 应用场景
+Location: `wiki/system/index.md`
 
-1. Scenario 1 - [[Source]]
-2. Scenario 2 - [[Source]]
+```markdown
+# 系统索引
+
+**生成时间**: {timestamp}
+
+---
+
+## 📚 主题清单
+| 主题 | 文档数 | 实体数 |
+|------|--------|--------|
+| [[主题聚合/{Topic}]] | {n} | {n} |
+
+## 🏷️ 实体清单
+| 实体 | 类型 | 所属主题 |
+|------|------|----------|
+| [[{Entity}]] | {type} | {Topic1}, {Topic2} |
+
+## 📦 归档文档
+| 文档 | 时间 | 主题 |
+|------|------|------|
+| [[归档文档/{Doc}]] | {date} | {topic} |
+```
+
+## Topic Classification Algorithm
+
+```javascript
+function classifyTopic(document) {
+  const content = document.content.toLowerCase();
+  const title = document.title.toLowerCase();
+  
+  const topicKeywords = {
+    'Agent 架构体系': [
+      '星形架构', 'main agent', 'sub agent', '多agent', 'agent协作', 
+      '调度', 'langgraph', '架构', '中心节点', '子节点'
+    ],
+    '可观测性与追踪': [
+      'langsmith', '追踪', '监控', '可观测', 'observability', 
+      'projectid', 'traceid', 'runid', '链路', 'tracing'
+    ],
+    '前后端协作规范': [
+      'stream', '前后端', '事件流', '状态流', 'sse', 
+      'websocket', '协作', 'frontend', 'backend', 'astream'
+    ]
+  };
+  
+  const scores = {};
+  
+  for (const [topic, keywords] of Object.entries(topicKeywords)) {
+    scores[topic] = 0;
+    for (const keyword of keywords) {
+      if (content.includes(keyword) || title.includes(keyword)) {
+        scores[topic]++;
+      }
+    }
+  }
+  
+  // Return topic with highest score
+  const primaryTopic = Object.entries(scores)
+    .sort((a, b) => b[1] - a[1])[0][0];
+  
+  // Return secondary topics (score > 0)
+  const secondaryTopics = Object.entries(scores)
+    .filter(([topic, score]) => score > 0 && topic !== primaryTopic)
+    .map(([topic]) => topic);
+  
+  return { primary: primaryTopic, secondary: secondaryTopics };
+}
 ```
 
 ## Common Issues
@@ -205,60 +375,31 @@ If `待处理/` folder is empty:
 - Inform user: "待处理文件夹为空，没有需要摄取的文档"
 - Suggest: "请在飞书 LLM-wiki/待处理/ 文件夹中放入文档"
 
-### Document Download Failed
+### Topic Classification Uncertain
 
-If document cannot be downloaded:
-- Check Feishu API access
-- Verify document token is valid
-- Log error to `wiki/log.md`
-- Skip to next document
+If document doesn't match any topic clearly:
+- Flag for manual review
+- Default to "未分类" topic
+- Log in system log
 
-### LLM Analysis Timeout
+### Topic Page Too Large
 
-If LLM analysis takes too long:
-- Set reasonable timeout (e.g., 5 minutes per document)
-- Document likely too complex - suggest breaking it down
-- Log partial results
-
-## Resources
-
-### scripts/
-- `ingest.js` - Main ingest script (already exists in llm-wiki project)
-- `sync.js` - Sync script to Feishu Wiki
-
-### references/
-- `schema.md` - Complete Wiki configuration and conventions
-- `QUICKSTART.md` - Quick start guide
-- `FEISHU_WIKI_STRUCTURE.md` - Feishu Wiki space structure
-
-## Troubleshooting
-
-### Permission Issues
-
-If Feishu API returns permission errors:
-- Ensure user has authorized the Feishu app
-- Check required permissions: `drive:drive`, `drive:file`, `wiki:wiki`
-- Re-authorize if needed
-
-### Sync Failures
-
-If sync to Feishu Wiki fails:
-- Check network connection
-- Verify Wiki space ID is correct
-- Check cron job logs
-- Manual sync: `npm run sync` from llm-wiki directory
+If topic page exceeds 5000 characters:
+- Trigger topic split warning
+- Suggest creating sub-topics
+- Log in system log
 
 ## Best Practices
 
-1. **Process documents one at a time** for better quality control
-2. **Review generated Wiki pages** before archiving
-3. **Keep entity and concept names consistent**
-4. **Use internal links** [[PageName]] for cross-references
-5. **Update log.md** after each operation
-6. **Commit to Git** after successful ingest
+1. **Always classify topic first** before processing entities
+2. **Update topic page incrementally** - append new content don't overwrite
+3. **Link entities to topics** - ensure bidirectional references
+4. **Keep archive pages complete** - full content for traceability
+5. **Update system index** - maintain accurate statistics
+6. **Log all operations** - for audit and debugging
 
 ## Related Skills
 
 - `llm-wiki-query` - Query the Wiki knowledge base
-- `llm-wiki-lint` - Health check and consistency verification
+- `llm-wiki-topic-manager` - Topic health check and reorganization
 - `llm-wiki-sync` - Manual sync to Feishu Wiki
