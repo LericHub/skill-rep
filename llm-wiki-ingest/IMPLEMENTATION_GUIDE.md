@@ -1,12 +1,22 @@
-# LLM Wiki Ingest - 实现指南
+# LLM Wiki Ingest - OpenClaw + 飞书环境实现指南
 
-> 本指南面向 LLM/AI Agent 开发者，详细描述如何在任意智能体环境中复现本 Skill 的功能
+> ⚠️ **环境说明**: 本指南专门针对 **OpenClaw + 飞书 Wiki** 环境
+> 
+> 如果你使用扣子智能体环境，请参考 [COZE_AGENT_GUIDE.md](./COZE_AGENT_GUIDE.md)
+
+> 本指南面向在 OpenClaw 平台上使用飞书 Wiki 集成的开发者，详细描述如何在该环境下实现本 Skill 的功能
 
 ---
 
 ## 📋 概述
 
 LLM Wiki Ingest 是一个自动化知识库摄取系统，能够将非结构化文档转化为结构化的主题-实体-归档三层知识库。
+
+**本指南适用的环境**:
+- ✅ OpenClaw Agent 平台
+- ✅ 飞书 Wiki 集成
+- ✅ 飞书云空间文件夹访问
+- ✅ 飞书 API 调用权限（feishu_create_doc, feishu_wiki_space_node 等）
 
 **核心能力**：
 - 📄 自动文档摄取与解析
@@ -50,11 +60,22 @@ llm-wiki-ingest/
 
 ### 模块 1: 文档摄取
 
-**功能**: 从待处理文件夹读取文档，提取原始内容
+**功能**: 从飞书云空间 `待处理` 文件夹读取文档，提取原始内容
+
+**环境**: OpenClaw 通过飞书 API 访问云空间
 
 **输入**:
-- 文档文件夹路径（本地路径或云存储文件夹ID）
-- 支持的格式: Markdown, DOCX, TXT
+- 飞书云空间文件夹 Token: `S7JbfzAKHlCxpbdazqicUdmjnGe`
+- 支持的格式: docx, doc, bitable, sheet
+
+**OpenClaw API 调用**:
+```javascript
+// 在 OpenClaw 环境中使用 feishu_drive_file 工具
+const result = await feishu_drive_file({
+  action: 'list',
+  folder_token: 'S7JbfzAKHlCxpbdazqicUdmjnGe'
+});
+```
 
 **输出**:
 ```javascript
@@ -73,9 +94,9 @@ llm-wiki-ingest/
 ```
 
 **实现逻辑**:
-1. 扫描待处理文件夹
+1. 调用 `feishu_drive_file list` 扫描待处理文件夹
 2. 识别支持的文档格式
-3. 读取/下载文档内容
+3. 调用 `feishu_fetch_doc` 读取文档内容
 4. 统一转换为 Markdown 格式
 5. 保存到临时目录（raw/）
 
@@ -472,10 +493,37 @@ const TOPIC_ENTITY_MAPPING = {
 };
 ```
 
-**实现步骤**:
-1. 创建主题页（根节点）
-2. 创建实体页/归档页
-3. 将实体页/归档页移动到对应主题下
+**OpenClaw 实现步骤**:
+1. 创建主题页（根节点）- 使用 `feishu_create_doc`
+2. 创建实体页/归档页 - 使用 `feishu_create_doc`
+3. 将实体页/归档页移动到对应主题下 - 使用 `feishu_wiki_space_node move`
+
+**OpenClaw API 调用示例**:
+```javascript
+// 1. 创建主题页
+const topicResult = await feishu_create_doc({
+  title: 'Agent 架构体系',
+  markdown: topicContent,
+  wiki_space: '7633348949482589405'
+});
+const topicNodeToken = topicResult.doc_id;
+
+// 2. 创建实体页
+const entityResult = await feishu_create_doc({
+  title: 'DeepAgents',
+  markdown: entityContent,
+  wiki_space: '7633348949482589405'
+});
+const entityNodeToken = entityResult.doc_id;
+
+// 3. 建立父子关系（将实体页移动到主题下）
+await feishu_wiki_space_node({
+  action: 'move',
+  node_token: entityNodeToken,
+  target_parent_token: topicNodeToken,
+  target_space_id: '7633348949482589405'
+});
+```
 
 ---
 
@@ -508,51 +556,171 @@ const TOPIC_ENTITY_MAPPING = {
 
 ---
 
-## 🔧 完整工作流程
+## 🔧 OpenClaw 完整工作流程
+
+以下是在 OpenClaw 环境中使用飞书 API 的完整摄取流程：
 
 ```javascript
-async function ingestDocument(docPath) {
-  // 1. 读取文档
-  const doc = await readDocument(docPath);
+async function ingestDocument(fileToken) {
+  // 1. 读取文档（OpenClaw 调用飞书 API）
+  const docMeta = await feishu_drive_file({
+    action: 'get_meta',
+    file_token: fileToken,
+    type: 'docx'
+  });
+  
+  const docContent = await feishu_fetch_doc({
+    doc_id: fileToken
+  });
+  
+  const doc = {
+    title: docMeta.title,
+    content: docContent.markdown,
+    source: `feishu://file/${fileToken}`
+  };
   
   // 2. 主题分类
   const { primary: topic } = classifyTopic(doc);
   
-  // 3. 实体提取
+  // 3. 实体提取（使用 LLM）
   const entities = await extractEntities(doc.content, {
     useLLM: true,
-    requireApproval: true
+    requireApproval: false  // OpenClaw 环境自动处理
   });
   
-  // 4. 构建链接映射
-  const linkMap = await buildLinkMap(WIKI_PATH);
+  // 4. 构建链接映射（从已创建的飞书页面获取 node_tokens）
+  const linkMap = await buildLinkMapFromFeishu('7633348949482589405');
   
-  // 5. 生成/更新页面
+  // 5. 生成/更新页面（OpenClaw 调用 feishu_create_doc）
+  
   // 5.1 更新主题页
-  await updateTopicPage(topic, doc, entities, linkMap);
+  const topicNodeToken = await getTopicNodeToken(topic);
+  const updatedTopicContent = generateTopicContent(topic, doc, entities, linkMap);
+  await feishu_update_doc({
+    doc_id: topicNodeToken,
+    markdown: updatedTopicContent,
+    mode: 'overwrite'
+  });
   
   // 5.2 创建/更新实体页
   for (const entity of entities) {
-    await createOrUpdateEntityPage(entity, doc, linkMap);
+    const entityContent = generateEntityContent(entity, doc, linkMap);
+    const entityResult = await feishu_create_doc({
+      title: entity.name,
+      markdown: entityContent,
+      wiki_space: '7633348949482589405'
+    });
+    
+    // 记录 entity node_token 用于后续链接
+    linkMap[entity.name] = {
+      ...linkMap[entity.name],
+      nodeToken: entityResult.doc_id
+    };
   }
   
   // 5.3 创建归档页
-  const archivePage = await createArchivePage(doc, entities, linkMap);
+  const archiveContent = generateArchiveContent(doc, entities, linkMap, topic);
+  const archiveResult = await feishu_create_doc({
+    title: doc.title,
+    markdown: archiveContent,
+    wiki_space: '7633348949482589405'
+  });
   
-  // 6. 建立层级关系
-  await buildHierarchy(topic, entities, archivePage);
+  // 6. 建立层级关系（OpenClaw 调用 feishu_wiki_space_node）
+  const topicEntityMap = getTopicEntityMapping();
+  
+  // 将实体页移动到主题下
+  for (const entity of entities) {
+    if (linkMap[entity.name]?.nodeToken) {
+      await feishu_wiki_space_node({
+        action: 'move',
+        node_token: linkMap[entity.name].nodeToken,
+        target_parent_token: topicNodeToken,
+        target_space_id: '7633348949482589405'
+      });
+    }
+  }
+  
+  // 将归档页移动到归档索引下
+  const archiveIndexToken = 'Xi8twf6Jgii59VkGpgkcnVbCnCe';
+  await feishu_wiki_space_node({
+    action: 'move',
+    node_token: archiveResult.doc_id,
+    target_parent_token: archiveIndexToken,
+    target_space_id: '7633348949482589405'
+  });
   
   // 7. 更新系统索引
-  await updateSystemIndex();
+  await updateSystemIndex(linkMap);
   
-  // 8. 记录日志
+  // 8. 记录日志（本地或飞书文档）
   await appendLog(doc, topic, entities);
   
-  // 9. 归档源文档
-  await moveToArchive(docPath);
+  // 9. 归档源文档（移动到飞书已归档文件夹）
+  await feishu_drive_file({
+    action: 'move',
+    file_token: fileToken,
+    folder_token: 'FzubfNFlIlgFSDdVdE4coKCbnYg',
+    type: 'doc'
+  });
   
-  return { topic, entities, archivePage };
+  return { topic, entities, archivePage: archiveResult };
 }
+```
+
+---
+
+## 🔧 OpenClaw 环境配置
+
+### 必需的 OpenClaw 配置
+
+在 OpenClaw 的 `config.yaml` 中需要配置以下飞书相关插件：
+
+```yaml
+plugins:
+  entries:
+    feishu:
+      config:
+        appId: "cli_xxxxxxxxxxxxxxxx"      # 飞书应用 ID
+        appSecret: "xxxxxxxxxxxxxxxx"      # 飞书应用密钥
+        encryptKey: "xxxxxxxxxxxxxxxx"     # 加密密钥（可选）
+        verificationToken: "xxxxxxxxxx"    # 验证 Token（可选）
+```
+
+### OpenClaw 环境特有的工具
+
+| 工具 | 用途 | OpenClaw 调用方式 |
+|------|------|------------------|
+| `feishu_drive_file` | 云空间文件管理 | `feishu_drive_file({ action: 'list', folder_token: 'xxx' })` |
+| `feishu_fetch_doc` | 获取文档内容 | `feishu_fetch_doc({ doc_id: 'xxx' })` |
+| `feishu_create_doc` | 创建飞书文档 | `feishu_create_doc({ title: 'xxx', markdown: 'xxx' })` |
+| `feishu_update_doc` | 更新飞书文档 | `feishu_update_doc({ doc_id: 'xxx', markdown: 'xxx' })` |
+| `feishu_wiki_space_node` | Wiki 节点管理 | `feishu_wiki_space_node({ action: 'move', node_token: 'xxx' })` |
+
+### 飞书 Wiki 空间配置
+
+```javascript
+const FEISHU_CONFIG = {
+  // Wiki 空间 ID
+  spaceId: '7633348949482589405',
+  
+  // 文件夹 Tokens
+  folders: {
+    pending: 'S7JbfzAKHlCxpbdazqicUdmjnGe',    // 待处理
+    archived: 'FzubfNFlIlgFSDdVdE4coKCbnYg'   // 已归档
+  },
+  
+  // 已知页面 node_tokens（用于更新）
+  pages: {
+    home: 'Kq2kwch3zig5ufk6ShDcMjXlni8',
+    agentArchitecture: 'KrqKwcqkOiEZR9kMvMEcZnnonJf',
+    observability: 'HK1Dw0u31ifsprkrAnhcOVKFnSc',
+    collaboration: 'XQwfwWNleiqkhVkCjs7cmzw8nKe',
+    archiveIndex: 'Xi8twf6Jgii59VkGpgkcnVbCnCe',
+    systemIndex: 'GjKnwQGwhiRyrmkL2OVcquXEn3g',
+    log: 'INnDwnmjDi9YRTkR94qc6DYEnLg'
+  }
+};
 ```
 
 ---
@@ -625,10 +793,26 @@ node ingest.js ./path/to/document.md
 
 ---
 
+## 🆚 环境指南对照
+
+本指南与其他环境指南的区别：
+
+| 指南 | 目标环境 | 主要区别 |
+|------|---------|---------|
+| **本指南** (IMPLEMENTATION_GUIDE.md) | OpenClaw + 飞书 Wiki | 使用飞书 API (feishu_*)，云端存储，API 调用建立层级 |
+| [COZE_AGENT_GUIDE.md](./COZE_AGENT_GUIDE.md) | 扣子智能体 | 使用本地文件系统 (fs.*)，本地存储，文件夹嵌套建立层级 |
+
+**如何选择**:
+- 如果你在 **OpenClaw 平台** 并使用 **飞书 Wiki** → 阅读本指南
+- 如果你在 **扣子智能体** 或需要 **纯本地部署** → 阅读 COZE_AGENT_GUIDE.md
+
+---
+
 ## 📖 扩展阅读
 
-- [SKILL.md](./SKILL.md) - 完整功能说明
-- [COZE_AGENT_GUIDE.md](./COZE_AGENT_GUIDE.md) - 扣子智能体环境适配
+- [README.md](./README.md) - 项目概述与快速开始
+- [SKILL.md](./SKILL.md) - 完整功能说明和 API 文档
+- [COZE_AGENT_GUIDE.md](./COZE_AGENT_GUIDE.md) - 扣子智能体环境适配指南
 - [README.md](./README.md) - 项目概述
 
 ---
