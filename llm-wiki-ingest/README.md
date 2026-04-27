@@ -158,6 +158,46 @@ const linkMap = await buildLinkMap('./wiki');
 - Wiki 空间管理员权限
 - 云空间文件夹访问权限
 
+#### OpenClaw 权限申请
+
+在 OpenClaw 平台使用飞书功能，需要申请以下权限：
+
+**1. 飞书应用权限**
+```yaml
+# 在 OpenClaw 配置文件中添加：
+plugins:
+  entries:
+    feishu:
+      config:
+        appId: "cli_xxxxxxxxxxxxxxxx"      # 飞书应用 ID
+        appSecret: "xxxxxxxxxxxxxxxx"      # 飞书应用密钥
+```
+
+**2. 飞书开放平台配置**
+- 登录 [飞书开放平台](https://open.feishu.cn/)
+- 创建企业自建应用
+- 开启以下权限：
+  - `drive:drive:readonly` - 读取云空间文件
+  - `drive:file:readonly` - 读取文件内容
+  - `drive:file:write` - 写入文件
+  - `wiki:wiki:readonly` - 读取 Wiki
+  - `wiki:wiki:write` - 写入 Wiki
+  - `docx:document:readonly` - 读取文档
+  - `docx:document:write` - 写入文档
+
+**3. OpenClaw 环境变量**
+```bash
+# 设置环境变量
+export FEISHU_APP_ID=cli_xxxxxxxxxxxxxxxx
+export FEISHU_APP_SECRET=xxxxxxxxxxxxxxxx
+```
+
+**4. 权限验证**
+```bash
+# 测试连接
+openclaw tool feishu_drive_file --action list --folder_token xxx
+```
+
 #### 快速安装
 
 ```bash
