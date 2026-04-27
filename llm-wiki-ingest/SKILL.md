@@ -596,3 +596,249 @@ If topic page exceeds 5000 characters:
 - `llm-wiki-query` - Query the Wiki knowledge base
 - `llm-wiki-topic-manager` - Topic health check and reorganization
 - `llm-wiki-sync` - Manual sync to Feishu Wiki
+
+---
+
+## Core Components (v2.0)
+
+### Entity Extractor (`references/entity-extractor.js`)
+
+分层实体识别策略，避免概念爆炸。
+
+**设计理念**:
+```
+┌─────────────────────────────────────────┐
+│  第一层：规则匹配（零LLM开销）            │
+│  - 关键词匹配已知实体                      │
+│  - 正则提取特定模式（如"XX Agent"）        │
+├─────────────────────────────────────────┤
+│  第二层：LLM提取（有约束）                │
+│  - 仅处理规则未覆盖的内容                  │
+│  - 最多3个新实体，置信度>0.7              │
+├─────────────────────────────────────────┤
+│  第三层：过滤层                          │
+│  - 长度、频率、相似度检查                 │
+├─────────────────────────────────────────┤
+│  第四层：人工审核（可选）                 │
+│  - 全新实体需确认                         │
+└─────────────────────────────────────────┘
+```
+
+**配置参数**:
+```javascript
+const CONFIG = {
+  extraction: {
+    minFrequency: 2,          // 最少出现次数
+    minConfidence: 0.7,       // LLM置信度阈值
+    maxNameLength: 30,        // 实体名最大长度
+    maxNewPerDoc: 3,          // 每文档最多新实体数
+    similarityThreshold: 0.8  // 相似度阈值
+  },
+  blacklist: ['系统', '功能', '方法', '流程', '模块']  // 禁止提取
+};
+```
+
+**使用方法**:
+```javascript
+const { extractEntities } = require('./references/entity-extractor.js');
+
+// 提取实体（自动分层处理）
+const entities = await extractEntities(documentContent, {
+  existingEntities: ['DeepAgents', 'LangChain'],  // 已知实体
+  useLLM: true,                                    // 启用LLM层
+  requireApproval: true                            // 新实体需审核
+});
+
+// 返回格式
+[
+  {
+    name: 'LangSmith',
+    type: '工具',
+    definition: 'LangChain官方可观测性工具',
+    frequency: 5,
+    confidence: 0.95,
+    source: 'exact_match',      // exact_match | pattern_* | llm_extracted
+    requiresApproval: false
+  }
+]
+```
+
+**防概念爆炸机制**:
+1. **Prompt约束**: 明确提取标准、禁止项、输出限制（最多3个）
+2. **规则过滤**: 长度<30，频率≥2，相似度<0.8
+3. **黑名单过滤**: 通用词汇自动排除
+4. **主题固定**: 强制归入现有3个主题，禁止自动创建
+
+---
+
+### Link Builder (`references/link-builder.js`)
+
+动态扫描文件系统构建链接映射，零硬编码。
+
+**设计理念**:
+- 运行时动态扫描 `entities/`, `topics/`, `archive/` 文件夹
+- 与实际文件系统保持一致
+- 自动适应新增/删除实体
+- 支持本地相对路径和飞书URL两种格式
+
+**核心功能**:
+
+#### 1. 动态构建链接映射
+```javascript
+const { buildLinkMap } = require('./references/link-builder.js');
+
+// 从文件系统扫描构建映射
+const linkMap = await buildLinkMap({
+  basePath: '/workspace/projects/workspace/llm-wiki/wiki',
+  nodeTokenMap: {  // 可选：飞书node_token映射
+    'DeepAgents': 'MwwxwpM9ti5yyWkk0NJcxuwWnHh',
+    'LangChain': 'G29Vw3M7ZiNmwMktaVBcfShdnHe'
+  }
+});
+
+// 返回格式
+{
+  'DeepAgents': {
+    name: 'DeepAgents',
+    type: 'entity',
+    localPath: './entities/DeepAgents.md',
+    nodeToken: 'MwwxwpM9ti5yyWkk0NJcxuwWnHh'
+  },
+  'Agent 架构体系': {
+    name: 'Agent 架构体系',
+    type: 'topic',
+    localPath: './topics/Agent%20架构体系.md',
+    nodeToken: 'KrqKwcqkOiEZR9kMvMEcZnnonJf'
+  }
+}
+```
+
+#### 2. 生成链接（支持两种格式）
+```javascript
+const { generateLocalLink, generateFeishuLink } = require('./references/link-builder.js');
+
+// 本地格式
+generateLocalLink('DeepAgents', linkMap);
+// 返回: [DeepAgents](./entities/DeepAgents.md)
+
+// 飞书格式
+generateFeishuLink('DeepAgents', linkMap);
+// 返回: [DeepAgents](https://www.feishu.cn/wiki/MwwxwpM9ti5yyWkk0NJcxuwWnHh)
+```
+
+#### 3. 批量修复 Wiki 链接
+```javascript
+const { fixAllWikiLinks } = require('./references/link-builder.js');
+
+// 批量修复目录中的所有 Markdown 文件
+const results = await fixAllWikiLinks('/workspace/projects/workspace/llm-wiki/wiki', {
+  format: 'local',      // 'local' | 'feishu'
+  dryRun: false         // true = 预览不写入
+});
+
+// 返回结果
+{
+  fixed: ['topics/Agent 架构体系.md', 'entities/DeepAgents.md'],
+  skipped: ['system/log.md'],
+  unmapped: ['动态扩缩', '中心化调度'],  // 未找到映射的实体
+  linkMap: { ... }
+}
+```
+
+#### 4. 生成主题页实体列表
+```javascript
+const { generateTopicEntityList } = require('./references/link-builder.js');
+
+// 自动生成带链接的实体列表表格
+const markdown = await generateTopicEntityList(
+  'Agent 架构体系',
+  ['DeepAgents', 'LangChain', 'Main Agent', 'Sub Agent'],
+  { format: 'feishu' }
+);
+
+// 输出 Markdown 表格
+// | 实体 | 类型 | 一句话定义 |
+// |------|------|-----------|
+// | [DeepAgents](...) | entity | ... |
+```
+
+---
+
+## Migration Guide
+
+### 从 v1.0 迁移到 v2.0
+
+**变更1: 实体提取** (旧 → 新)
+```javascript
+// 旧方式：硬编码列表 + 简单匹配
+const ENTITY_LIST = ['DeepAgents', 'LangChain', ...];
+const found = ENTITY_LIST.filter(e => content.includes(e));
+
+// 新方式：分层提取
+const { extractEntities } = require('./references/entity-extractor.js');
+const entities = await extractEntities(content, { useLLM: true });
+```
+
+**变更2: 链接生成** (旧 → 新)
+```javascript
+// 旧方式：硬编码映射
+const linkMap = {
+  'DeepAgents': './entities/DeepAgents.md',
+  'LangChain': './entities/LangChain.md'
+};
+
+// 新方式：动态扫描
+const { buildLinkMap } = require('./references/link-builder.js');
+const linkMap = await buildLinkMap();
+```
+
+**变更3: 链接修复** (新增功能)
+```javascript
+// 批量修复本地文件中的 [[...]] 格式
+const { fixAllWikiLinks } = require('./references/link-builder.js');
+await fixAllWikiLinks('/path/to/wiki', { format: 'local' });
+```
+
+---
+
+## Configuration Reference
+
+### 完整配置示例
+```javascript
+// config.js
+module.exports = {
+  // 主题（严格固定）
+  topics: {
+    list: ['Agent 架构体系', '可观测性与追踪', '前后端协作规范'],
+    allowNew: false,           // 禁止自动创建新主题
+    fallback: '待分类'         // 无法归类时的标记
+  },
+  
+  // 实体（半动态）
+  entities: {
+    known: ['DeepAgents', 'LangChain', 'LangSmith'],  // 已知实体
+    autoDiscover: true,        // 启用自动发现
+    maxNewPerDoc: 3,           // 每文档最多新实体
+    requireApproval: true      // 新实体需人工确认
+  },
+  
+  // 提取约束
+  extraction: {
+    minFrequency: 2,
+    minConfidence: 0.7,
+    maxNameLength: 30,
+    similarityThreshold: 0.8,
+    blacklist: ['系统', '功能', '方法', '流程', '模块']
+  },
+  
+  // 链接生成
+  links: {
+    useDynamicScan: true,      // 使用动态扫描
+    basePath: './wiki',
+    formats: {
+      local: '[{name}]({path})',
+      feishu: '[{name}](https://www.feishu.cn/wiki/{node_token})'
+    }
+  }
+};
+```
