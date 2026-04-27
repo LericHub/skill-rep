@@ -5,6 +5,27 @@
 [![Version](https://img.shields.io/badge/version-2.0-blue.svg)](./UPDATE_LOG.md)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](./LICENSE)
 
+## 🎉 今日重大更新（2026-04-27）
+
+### ✨ v2.0 全新发布
+
+**核心升级**：
+1. **🤖 全自动动态主题管理** - LLM实时决策，无需预定义主题，无需人工审核
+2. **🏷️ 智能实体提取** - 三层过滤策略，防止概念爆炸（规则层+LLM层+过滤层）
+3. **🔗 动态链接映射** - 运行时扫描文件系统，零硬编码，自动适应变化
+4. **📚 完整文档体系** - 新增详细实现指南（OpenClaw+飞书 / 扣子双环境）
+
+**新增组件**：
+- `entity-extractor.js` - 分层实体识别
+- `link-builder.js` - 动态链接构建  
+- `topic-manager.js` - 全自动主题管理
+
+**新增文档**：
+- [IMPLEMENTATION_GUIDE.md](./IMPLEMENTATION_GUIDE.md) - OpenClaw+飞书环境详细实现指南
+- [COZE_AGENT_GUIDE.md](./COZE_AGENT_GUIDE.md) - 扣子智能体环境适配指南
+
+---
+
 ## 📋 什么是 LLM Wiki Ingest？
 
 LLM Wiki Ingest 是一个**智能文档摄取系统**，专为 LLM/AI Agent 设计，能够自动处理各种格式的文档，提取关键知识，并构建结构化的**主题-实体-归档**三层知识库。
