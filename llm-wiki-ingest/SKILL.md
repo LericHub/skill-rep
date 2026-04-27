@@ -114,7 +114,7 @@ For each entity mentioned in the document:
 
 ### Step 6: Create Archive Document Page
 
-Create a new page in archive section:
+Create a new page in archive section and sync to Feishu Wiki:
 
 **Location**: `wiki/archive/{document-title}.md`
 
@@ -125,15 +125,15 @@ Create a new page in archive section:
 **摄取时间**: {YYYY-MM-DD HH:mm}
 **原始来源**: [飞书链接]({feishu_url})
 **文档类型**: {docx/bitable/sheet}
-**所属主题**: [[主题聚合/{Primary Topic}]]
+**所属主题**: [[{Primary Topic}]]
 
 ## 📋 核心摘要
 
 {2-3 paragraphs summary}
 
 ## 🔗 生成的实体
-- [[Entity1]]
-- [[Entity2]]
+- [[{Entity1}]]
+- [[{Entity2}]]
 
 ## 📚 知识点
 - Point 1
@@ -141,6 +141,28 @@ Create a new page in archive section:
 
 ## 📄 完整内容
 {Full document content}
+```
+
+**Sync to Feishu Wiki**:
+- Create the archive document in Feishu Wiki
+- Link it as a child node to the corresponding topic page
+- Use the parent topic's `node_token` as `target_parent_token`
+
+**飞书 API 操作**:
+```javascript
+feishu_create_doc({
+  wiki_space: '7633348949482589405',
+  title: '{Document Title}',
+  markdown: '<archive_content>'
+});
+
+// 然后移动到对应主题下
+feishu_wiki_space_node({
+  action: 'move',
+  node_token: '{archive_doc_node_token}',
+  target_parent_token: '{topic_node_token}',
+  target_space_id: '7633348949482589405'
+});
 ```
 
 ### Step 7: Update System Index
@@ -171,20 +193,31 @@ Add entry to `wiki/system/log.md`:
 - 来源: {Feishu link}
 - 处理时间: {HH:mm:ss}
 - 识别主题: {Primary Topic}
-- 生成/更新实体: [[Entity1]], [[Entity2]]
-- 创建归档页: [[归档文档/{Document Title}]]
+- 生成/更新实体: [[{Entity1}]], [[{Entity2}]]
+- 创建归档页: [[{Document Title}]] (已同步到飞书)
 ```
 
 ### Step 9: Archive Source Document
 
-Move processed documents from `待处理/` to `已归档/` folder:
+Move processed documents from `待处理/` to `已归档/` folder in Feishu:
 
-- Archive folder token: `FzubfNFlIlgFSDdVdE4coKCbnYg`
+- **Source folder**: `LLM-wiki/待处理/` (token: `S7JbfzAKHlCxpbdazqicUdmjnGe`)
+- **Target folder**: `LLM-wiki/已归档/` (token: `FzubfNFlIlgFSDdVdE4coKCbnYg`)
 - Keep original filenames
+
+**飞书 API 操作**:
+```javascript
+feishu_drive_file({
+  action: 'move',
+  file_token: '{source_file_token}',
+  folder_token: 'FzubfNFlIlgFSDdVdE4coKCbnYg',  // 已归档文件夹
+  type: 'doc'  // 或 'file', 取决于文档类型
+});
+```
 
 ### Step 10: Sync to Feishu Wiki
 
-Sync updated Wiki to Feishu Wiki space:
+Sync updated Wiki to Feishu Wiki space and build hierarchy:
 
 - Wiki space ID: `7633348949482589405`
 - Create/update pages in corresponding sections
@@ -254,6 +287,13 @@ Sync updated Wiki to Feishu Wiki space:
 - 系统索引: `Ack9wlDHYiufrhktK9fcmwTonkg`
 - log: `VFxJwSTUyiDtC9kwfNxcHe2ln9c`
 
+**Feishu API 功能**:
+- `feishu_create_doc` - 创建飞书文档/Wiki 页面
+- `feishu_update_doc` - 更新文档内容
+- `feishu_wiki_space_node` - 管理 Wiki 节点（创建、移动、复制）
+- `feishu_drive_file` - 管理云空间文件（移动、删除）
+- `feishu_fetch_doc` - 获取文档内容
+
 **Local Paths**:
 - Root: `/workspace/projects/workspace/llm-wiki`
 - Topics: `/workspace/projects/workspace/llm-wiki/wiki/topics`
@@ -305,8 +345,8 @@ Location: `wiki/topics/{topic-name}.md`
 
 ## 📦 来源文档
 
-- [[归档文档/{Doc1}]] - {summary}
-- [[归档文档/{Doc2}]] - {summary}
+- [[{Doc1}]] - {summary}
+- [[{Doc2}]] - {summary}
 
 ---
 
@@ -332,12 +372,12 @@ Location: `wiki/entities/{entity-name}.md`
 {Detailed description}
 
 ## 📚 相关主题
-- [[主题聚合/{Topic1}]]
-- [[主题聚合/{Topic2}]]
+- [[{Topic1}]]
+- [[{Topic2}]]
 
 ## 📦 来源
-- [[归档文档/{Doc1}]] - {description}
-- [[归档文档/{Doc2}]] - {description}
+- [[{Doc1}]] - {description}
+- [[{Doc2}]] - {description}
 
 ## 🔗 相关实体
 - [[{RelatedEntity}]] - {relationship}
@@ -353,7 +393,7 @@ Location: `wiki/archive/{document-title}.md`
 **摄取时间**: {YYYY-MM-DD HH:mm}
 **原始来源**: [飞书链接]({url})
 **文档类型**: {docx/bitable/sheet}
-**所属主题**: [[主题聚合/{Topic}]]
+**所属主题**: [[{Topic}]]
 
 ## 📋 核心摘要
 
@@ -369,6 +409,12 @@ Location: `wiki/archive/{document-title}.md`
 ## 📄 完整内容
 {Full content}
 ```
+
+**飞书同步说明**：
+- 归档文档会自动同步到飞书 Wiki 空间
+- 作为对应主题页的子文档挂载
+- 提供原始文档的完整内容供查阅
+- 飞书链接格式：`https://www.feishu.cn/wiki/{node_token}`
 
 ### System Index Page Template
 
