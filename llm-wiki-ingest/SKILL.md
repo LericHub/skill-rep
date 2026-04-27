@@ -12,13 +12,32 @@ Automatically ingest documents from Feishu "待处理" folder and generate struc
 This skill automates the complete document ingestion workflow for LLM Wiki with the new topic-based architecture:
 
 **知识库结构**:
-- 📚 **主题聚合页** (Topics) - 按查询场景组织，每个主题包含相关实体和知识点
-- 🏷️ **实体百科** (Entities) - 原子化实体定义，供主题页引用
-- 📦 **归档文档** (Archive) - 已摄取的原始文档完整内容
-- 🔧 **系统** (System) - 索引和日志
+- 🏠 **首页** (Home) - 纯粹的导航索引，通过链接跳转到各主题
+- 📚 **主题聚合页** (Topics) - 按查询场景组织，每个主题作为容器拥有自己的子文档（实体、归档）
+- 🏷️ **实体百科** (Entities) - 原子化实体定义，作为主题页的子文档
+- 📦 **归档文档** (Archive) - 已摄取的原始文档完整内容，作为主题页的子文档
+- 🔧 **系统** (System) - 索引和日志（根目录下）
+
+**飞书 Wiki 层级结构**:
+```
+LLM-wiki (空间)
+├── 🏠 首页 [根节点]
+├── 🎯 Agent 架构体系 [根节点]
+│   ├── 🧱 DeepAgents [子文档]
+│   ├── 🔗 LangChain [子文档]
+│   └── ...其他实体和归档文档
+├── 🔍 可观测性与追踪 [根节点]
+│   └── ...子文档
+├── 🤝 前后端协作规范 [根节点]
+│   └── ...子文档
+├── 📦 归档文档索引 [根节点]
+│   └── 📄 部署方案 [子文档]
+├── ⚙️ 系统索引 [根节点]
+└── 📋 log [根节点]
+```
 
 **处理流程**:
-1. 摄取文档 → 2. 主题分析 → 3. 更新主题页 → 4. 更新实体页 → 5. 创建归档页 → 6. 更新系统索引
+1. 摄取文档 → 2. 主题分析 → 3. 更新主题页 → 4. 更新实体页 → 5. 创建归档页 → 6. 更新系统索引 → 7. 建立父子层级关系
 
 ## Ingest Workflow
 
@@ -169,7 +188,55 @@ Sync updated Wiki to Feishu Wiki space:
 
 - Wiki space ID: `7633348949482589405`
 - Create/update pages in corresponding sections
-- Or wait for hourly scheduled sync
+- **建立父子层级关系**（Move 操作）
+
+**父子层级建立逻辑**:
+
+1. **确保主题页和首页在根目录**:
+   - 首页、主题页、系统页的 `parent_node_token = ""`
+
+2. **将实体和归档文档移动到对应主题下**:
+   ```javascript
+   // 主题-实体映射
+   const topicEntityMapping = {
+     'Agent 架构体系': [
+       'DeepAgents', 'LangChain', 'Main Agent', 'Sub Agent',
+       '星形架构', '事件流'
+     ],
+     '可观测性与追踪': [
+       'LangSmith', '全链路追踪', 'MeowBot 接入 LangSmith'
+     ],
+     '前后端协作规范': [
+       'DeepAgents Stream状态流及前后端对接'
+     ],
+     '归档文档索引': [
+       '动态星形多Agent架构（类Claude Agent Teams）部署方案'
+     ]
+   };
+
+   // 执行 move 操作
+   for (const [topic, entities] of Object.entries(topicEntityMapping)) {
+     const topicNodeToken = getNodeToken(topic); // 获取主题页的 node_token
+
+     for (const entity of entities) {
+       const entityNodeToken = getNodeToken(entity);
+       moveNode(entityNodeToken, {
+         target_parent_token: topicNodeToken,
+         target_space_id: '7633348949482589405'
+       });
+     }
+   }
+   ```
+
+3. **Move 操作 API**:
+   ```javascript
+   feishu_wiki_space_node({
+     action: 'move',
+     node_token: {entity_node_token},
+     target_parent_token: {topic_node_token},
+     target_space_id: '7633348949482589405'
+   });
+   ```
 
 ## Configuration
 
@@ -177,6 +244,15 @@ Sync updated Wiki to Feishu Wiki space:
 - Source folder: `LLM-wiki/待处理/` (token: `S7JbfzAKHlCxpbdazqicUdmjnGe`)
 - Archive folder: `LLM-wiki/已归档/` (token: `FzubfNFlIlgFSDdVdE4coKCbnYg`)
 - Wiki space: `LLM-wiki` (space_id: `7633348949482589405`)
+
+**Feishu Wiki Nodes**:
+- 首页: `Kq2kwch3zig5ufk6ShDcMjXlni8`
+- Agent 架构体系: `ImAqwcibziRRzDkuoiycFXrtntg`
+- 可观测性与追踪: `E9JbwYR8IiVqEWkkB7VcHwvmnAg`
+- 前后端协作规范: `TyYvwVBhkiBQUTk1O0RctYLBnRU`
+- 归档文档索引: `TsJzwT7EOiPCTBkyZricS4byn7c`
+- 系统索引: `Ack9wlDHYiufrhktK9fcmwTonkg`
+- log: `VFxJwSTUyiDtC9kwfNxcHe2ln9c`
 
 **Local Paths**:
 - Root: `/workspace/projects/workspace/llm-wiki`
