@@ -198,21 +198,150 @@ export FEISHU_APP_SECRET=xxxxxxxxxxxxxxxx
 openclaw tool feishu_drive_file --action list --folder_token xxx
 ```
 
-#### 快速安装
+#### 飞书初始化详细步骤
+
+**步骤 1：创建 Wiki 知识空间**
+
+```
+1. 打开飞书 → 左侧栏点击「Wiki」
+2. 点击右上角「+ 创建空间」
+3. 填写信息：
+   - 空间名称：LLM-wiki
+   - 空间描述：LLM 知识库
+   - 可见范围：按需设置（建议团队可见）
+4. 点击「创建」
+5. 记录空间 ID：从 URL 中获取
+   例如：https://www.feishu.cn/wiki/space/7633348949482589405
+   space_id = 7633348949482589405
+```
+
+**步骤 2：创建云空间文件夹结构**
+
+```
+1. 打开飞书 → 左侧栏点击「云空间」
+2. 进入「我的空间」或团队空间
+3. 创建文件夹：
+
+   LLM-wiki/
+   ├── 📁 待处理/     # 放置待摄取的原始文档
+   └── 📁 已归档/     # 系统自动归档已处理文档
+
+4. 记录 folder tokens（通过 OpenClaw 获取）
+   或使用以下方式获取：
+   - 在浏览器中打开文件夹
+   - 从 URL 中提取 folder_token
+```
+
+**步骤 3：创建初始知识库页面（手动创建）**
+
+在 Wiki 空间中创建以下页面：
+
+```
+LLM-wiki (空间)
+├── 🏠 首页                     # 手动创建 - 知识库导航入口
+├── 🎯 Agent 架构体系          # 手动创建 - 主题聚合页（可选，系统会自动创建）
+├── 🔍 可观测性与追踪          # 手动创建 - 主题聚合页（可选，系统会自动创建）
+├── 🤝 前后端协作规范          # 手动创建 - 主题聚合页（可选，系统会自动创建）
+├── 📦 归档文档索引            # 手动创建 - 归档目录页
+├── ⚙️ 系统索引               # 手动创建 - 全局索引
+└── 📋 log                    # 手动创建 - 操作日志
+```
+
+**首页内容模板**：
+```markdown
+# LLM Wiki 首页
+
+**最后更新**: 2026-04-27
+
+---
+
+## 📚 主题导航
+
+- [Agent 架构体系](链接到主题页)
+- [可观测性与追踪](链接到主题页)
+- [前后端协作规范](链接到主题页)
+
+---
+
+## 🔧 系统
+
+- [系统索引](链接)
+- [操作日志](链接)
+```
+
+**步骤 4：记录关键配置信息**
+
+创建 `config.feishu.js` 文件保存配置：
+
+```javascript
+module.exports = {
+  // Wiki 空间配置
+  wiki: {
+    spaceId: '7633348949482589405',
+    spaceName: 'LLM-wiki'
+  },
+  
+  // 云空间文件夹配置
+  folders: {
+    pending: {
+      name: '待处理',
+      token: 'S7JbfzAKHlCxpbdazqicUdmjnGe'    // 替换为你的 token
+    },
+    archived: {
+      name: '已归档',
+      token: 'FzubfNFlIlgFSDdVdE4coKCbnYg'    // 替换为你的 token
+    }
+  },
+  
+  // 初始页面 node_tokens（创建后填写）
+  pages: {
+    home: 'Kq2kwch3zig5ufk6ShDcMjXlni8',
+    archiveIndex: 'Xi8twf6Jgii59VkGpgkcnVbCnCe',
+    systemIndex: 'GjKnwQGwhiRyrmkL2OVcquXEn3g',
+    log: 'INnDwnmjDi9YRTkR94qc6DYEnLg'
+  }
+};
+```
+
+**步骤 5：测试初始化**
 
 ```bash
-# 1. 创建 Wiki 空间
-# 飞书 → Wiki → 创建空间 → LLM-wiki
-# 记录 space_id: 7633348949482589405
+# 1. 测试云空间访问
+openclaw tool feishu_drive_file list \
+  --folder_token S7JbfzAKHlCxpbdazqicUdmjnGe
 
-# 2. 准备云空间文件夹结构
-LLM-wiki/
-├── 待处理/     # 放置待摄取文档（token: S7JbfzAKHlCxpbdazqicUdmjnGe）
-└── 已归档/     # 自动归档目录（token: FzubfNFlIlgFSDdVdE4coKCbnYg）
+# 2. 测试 Wiki 访问
+openclaw tool feishu_wiki_space_node list \
+  --space_id 7633348949482589405
 
-# 3. 配置权限
-# - 应用有 Wiki 编辑权限
-# - 有云空间文件操作权限
+# 3. 创建测试文档
+openclaw tool feishu_create_doc \
+  --title "测试文档" \
+  --markdown "# 测试\n初始化测试" \
+  --wiki_space 7633348949482589405
+```
+
+#### 快速安装总结
+
+```bash
+# 完成上述初始化后，使用方式：
+
+# 1. 将文档放入待处理文件夹
+# 飞书云空间 → LLM-wiki/待处理/ → 上传文档
+
+# 2. 在 OpenClaw 中触发摄取
+# 发送消息："摄取文档" 或 "整理知识库"
+
+# 3. 系统自动执行：
+#    - 读取待处理文档
+#    - 分析并分类到主题
+#    - 提取实体
+#    - 创建/更新 Wiki 页面
+#    - 建立层级关系
+#    - 归档源文档
+
+# 4. 查看结果
+# 飞书 Wiki → LLM-wiki 空间 → 查看生成的页面
 ```
 
 #### 使用方式
