@@ -155,20 +155,77 @@ Create a new page in archive section and sync to Feishu Wiki:
 
 **飞书 API 操作**:
 ```javascript
-feishu_create_doc({
+// 1. 创建归档文档
+const archiveResult = await feishu_create_doc({
   wiki_space: '7633348949482589405',
   title: '{Document Title}',
-  markdown: '<archive_content>'
+  markdown: generateArchiveMarkdown(doc, entities, topicNodeToken)
 });
 
-// 然后移动到对应主题下
-feishu_wiki_space_node({
+// 2. 记录生成的实体链接映射
+const entityLinks = {
+  'DeepAgents': 'https://www.feishu.cn/wiki/MwwxwpM9ti5yyWkk0NJcxuwWnHh',
+  'Main Agent': 'https://www.feishu.cn/wiki/YYr5wwTHjir2WWklo2ac8pxMnwe',
+  // ... 其他实体
+};
+
+// 3. 构建归档文档内容（使用正确的链接格式）
+function generateArchiveMarkdown(doc, entities, topicNodeToken) {
+  const entityLinks = entities.map(e => 
+    `- [${e.name}](https://www.feishu.cn/wiki/${e.node_token})`
+  ).join('\n');
+  
+  const conceptLinks = doc.concepts.map(c => 
+    c.hasPage 
+      ? `- [${c.name}](https://www.feishu.cn/wiki/${c.node_token})`
+      : `- ${c.name}`  // 无独立页面的概念不添加链接
+  ).join('\n');
+  
+  return `# ${doc.title}
+
+**来源**: [查看原文](${doc.source_url})
+**摄取时间**: ${doc.ingest_time}
+**文档类型**: ${doc.type}
+**所属主题**: [${doc.topic}](https://www.feishu.cn/wiki/${topicNodeToken})
+
+## 📋 核心摘要
+${doc.summary}
+
+## 🔗 生成的实体
+${entityLinks}
+
+## 💭 概念关联
+${conceptLinks}
+
+## 📚 知识点
+${doc.key_points}
+
+## ❓ 开放问题
+${doc.open_questions}
+
+## 📄 完整内容
+${doc.full_content}`;
+}
+
+// 4. 将归档文档移动到"归档文档索引"下
+await feishu_wiki_space_node({
   action: 'move',
-  node_token: '{archive_doc_node_token}',
-  target_parent_token: '{topic_node_token}',
+  node_token: archiveResult.doc_id,
+  target_parent_token: 'Xi8twf6Jgii59VkGpgkcnVbCnCe',  // 归档文档索引的 node_token
   target_space_id: '7633348949482589405'
 });
 ```
+
+**链接生成规则**:
+1. **实体链接**: 必须已创建实体页面，使用 `[实体名](https://www.feishu.cn/wiki/{node_token})`
+2. **主题链接**: 使用 `[主题名](https://www.feishu.cn/wiki/{node_token})`
+3. **概念链接**: 仅当概念有独立页面时添加链接，否则纯文本
+4. **外部链接**: 原始来源使用 `[查看原文]({url})`
+
+**注意事项**:
+- 创建实体页面前，先获取其 node_token
+- 使用正确的 node_token 构建完整 URL
+- 概念如无独立页面，不要使用 `[[概念]]` 或 `[概念](url)`，直接用纯文本
 
 ### Step 7: Update System Index
 
@@ -408,8 +465,17 @@ Location: `wiki/archive/{document-title}.md`
 - [{Entity1}](https://www.feishu.cn/wiki/{node_token})
 - [{Entity2}](https://www.feishu.cn/wiki/{node_token})
 
+## 💭 概念关联
+- [{Concept1}](https://www.feishu.cn/wiki/{node_token})
+- [{Concept2}](https://www.feishu.cn/wiki/{node_token})
+- 其他概念...
+
 ## 📚 知识点
 {Key points}
+
+## ❓ 开放问题
+1. {Question 1}
+2. {Question 2}
 
 ## 📄 完整内容
 {Full content}
