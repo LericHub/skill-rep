@@ -1,0 +1,10 @@
+{
+  "id": "feature-spec",
+  "name": "功能规格文档",
+  "version": "1.0.0",
+  "author": "Anthropic",
+  "description": "Write structured product requirements documents (PRDs) with problem statements, user stories, requirements, and success metrics.",
+  "category": ["产品管理"],
+  "tags": ["PRD", "需求文档", "功能规格", "用户故事"],
+  "entry": "SKILL.md"
+}
