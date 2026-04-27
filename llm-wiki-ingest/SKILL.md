@@ -801,25 +801,111 @@ await fixAllWikiLinks('/path/to/wiki', { format: 'local' });
 
 ---
 
+### 3. 主题管理器 (`topic-manager.js`)
+
+**功能**: 全自动动态主题管理，LLM自主决策
+
+**核心特性**:
+- ✅ **实时决策**: 每篇文档摄取时立即分析并决策
+- ✅ **无待分类池**: 直接处理，不积累未分类文档
+- ✅ **LLM自主**: 全自动判断归入现有主题或创建新主题
+- ✅ **高门槛防泛滥**: 多重阈值 + 数量限制
+
+**决策逻辑**:
+```
+摄取文档
+    ↓
+1. LLM分析：提取核心概念，对比现有主题相似度
+    ↓
+2. 决策分支：
+   ├── 相似度 ≥ 0.7 → 归入最匹配的现有主题
+   ├── 相似度 < 0.4 → 直接创建新主题
+   └── 相似度 0.4-0.7 + 独特性 ≥ 0.6 → 创建新主题
+    ↓
+3. 数量限制检查：
+   └── 主题数 ≥ 10 → 强制归入最接近主题
+    ↓
+4. 执行：更新现有主题 或 创建新主题
+```
+
+**使用**:
+```javascript
+const { analyzeTopic, autoMergeTopics } = require('./references/topic-manager.js');
+
+// 分析文档并决策主题
+const decision = await analyzeTopic(
+  { title: '文档标题', content: '文档内容...' },
+  existingTopics,  // 现有主题列表
+  llmCaller        // LLM调用函数
+);
+
+// 返回结果
+{
+  decision: 'CREATE',           // 'CREATE' | 'MERGE'
+  newTopic: {
+    name: '新主题名称',
+    description: '一句话定义',
+    keywords: ['关键词1', '关键词2']
+  },
+  confidence: 0.85,
+  reasoning: '与现有主题匹配度低，适合新建主题'
+}
+
+// 自动维护：合并相似主题
+const merges = await autoMergeTopics(
+  existingTopics,
+  llmCaller,
+  (t1, t2) => { /* 合并逻辑 */ }
+);
+```
+
+**阈值配置**:
+```javascript
+const TOPIC_CONFIG = {
+  thresholds: {
+    mergeThreshold: 0.7,    // 归入现有主题门槛
+    createThreshold: 0.4,   // 创建新主题门槛
+    minUniqueness: 0.6      // 独特性最低要求
+  },
+  limits: {
+    maxTopics: 10,          // 最多主题数（防泛滥）
+    minDocsPerTopic: 2      // 主题最少文档数
+  },
+  maintenance: {
+    enable: true,
+    checkInterval: '7 days',
+    mergeSimilarity: 0.8    // 自动合并相似度
+  }
+};
+```
+
+---
+
 ## Configuration Reference
 
 ### 完整配置示例
 ```javascript
 // config.js
 module.exports = {
-  // 主题（严格固定）
+  // 主题（动态生成，LLM自主决策）
   topics: {
-    list: ['Agent 架构体系', '可观测性与追踪', '前后端协作规范'],
-    allowNew: false,           // 禁止自动创建新主题
-    fallback: '待分类'         // 无法归类时的标记
+    mode: 'dynamic',           // 'dynamic' | 'fixed'
+    maxTopics: 10,             // 最多主题数（防泛滥）
+    thresholds: {
+      merge: 0.7,              // 归入现有主题相似度门槛
+      create: 0.4,             // 创建新主题相似度上限
+      uniqueness: 0.6          // 独特性最低要求
+    },
+    autoMerge: true,           // 自动合并相似主题
+    mergeThreshold: 0.8        // 自动合并相似度
   },
   
   // 实体（半动态）
   entities: {
-    known: ['DeepAgents', 'LangChain', 'LangSmith'],  // 已知实体
+    known: ['DeepAgents', 'LangChain', 'LangSmith'],  // 初始已知实体
     autoDiscover: true,        // 启用自动发现
     maxNewPerDoc: 3,           // 每文档最多新实体
-    requireApproval: true      // 新实体需人工确认
+    requireApproval: false     // 全自动，无需人工确认
   },
   
   // 提取约束
