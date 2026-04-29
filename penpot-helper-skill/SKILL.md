@@ -103,6 +103,36 @@ AND `horizontalSizing: fill`.
 7. **Name by function, not appearance** (`title`, `icon`, `primary-action`) — this
    is what makes Fill/Auto decisions survive future swaps.
 
+## Screen-authoring rules
+
+Use these when generating full screens or any handoff-quality mock:
+
+1. **Build the container tree first.** A screen should have one main Board, then
+   named section Boards such as `header`, `content`, `footer`, `card-grid`, or
+   `sidebar`. Do not drop most layers directly under the page root.
+2. **Treat child coordinates as parent-relative.** A child at `x: 100` inside a
+   Board placed at page `x: 500` is still 100 px from the Board's left edge, not
+   100 px from the page origin.
+3. **Keep every child fully visible inside its intended container** unless the
+   overflow is intentional and the container is configured for it. Before calling
+   a screen done, verify:
+   - `child.x >= 0`
+   - `child.y >= 0`
+   - `child.x + child.width <= parent.width`
+   - `child.y + child.height <= parent.height`
+4. **A screen is not done when it only has boxes.** Handoff-quality mocks need
+   realistic content density: titles, body copy, icons, buttons, imagery/image
+   placeholders, labels, metrics, list rows, and status states where relevant.
+5. **Mock content should feel product-real.** Prefer plausible product names,
+   prices, counts, timestamps, section labels, and CTA labels over placeholder
+   sludge.
+6. **Use consistent spacing and visual roles.** Pick a spacing rhythm (for
+   example 8/12/16/24), a small set of corner radii, and clear text hierarchy.
+   Reuse them across the whole screen.
+7. **Keep the canvas clean.** Delete failed generations, duplicate frames, and
+   abandoned experiments once a better version exists. A deliverable file should
+   have an obvious current version.
+
 ## Standard recipe: a responsive screen
 
 Use this as the default scaffold for any full screen unless the user specifies
@@ -183,6 +213,17 @@ Board, attach its layout (`board.addFlexLayout()` / `addGridLayout()`), then
 create children and `appendChild` in visual order. Set each child's
 `layoutChild.horizontalSizing / verticalSizing` BEFORE adding siblings — otherwise
 defaults (usually Fix) will cause surprise overflow.
+
+When generating with the Plugin API or MCP, validate geometry after each major
+step instead of at the very end:
+
+- Inspect the current shape tree and confirm the intended parent-child structure.
+- Read each shape's `x`, `y`, `width`, and `height` in the coordinate space that
+  actually applies: page for top-level Boards, parent-relative for descendants.
+- Use those bounds to prevent off-canvas placement, sibling collisions, and empty
+  white frames whose content was accidentally positioned outside the container.
+- Prefer fixing structure first, then styling, then content polish. Styling the
+  wrong tree only hides geometry mistakes.
 
 ## Pre-flight checklist (run before declaring a layout "done")
 
