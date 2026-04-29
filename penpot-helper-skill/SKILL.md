@@ -208,6 +208,226 @@ There are two ways to drive Penpot from code:
    `export_shape`, `import_image`. Start read-only; only enable write tools once
    the plan is reviewed.
 
+### Critical API Rules
+
+**Before generating anything via MCP, read [`references/mcp-generation-guide.md`](references/mcp-generation-guide.md).** It covers the #1 source of bugs (absolute vs relative coordinates), ES5 compatibility requirements, and the step-by-step generation workflow.
+
+1. **`shape.x` / `shape.y` are ALWAYS page-absolute coordinates**  
+   They are NOT relative to the parent. To position a child inside a parent, you MUST calculate: `child.x = parent.x + desiredOffset`. Alternatively use `penpotUtils.setParentXY(child, offsetX, offsetY)` — but only AFTER the child has been appended to the parent.
+
+2. **Use insertChild, NOT appendChild**  
+   ```javascript
+   // ✅ CORRECT - predictable ordering for non-flex boards
+   parent.insertChild(parent.children.length, shape);
+
+   // ❌ BROKEN - unpredictable placement
+   parent.appendChild(shape);
+   ```
+   **Exception**: For flex layout boards, use `board.appendChild(shape)` which inserts at the visual end.
+
+3. **Position Properties**  
+   ```javascript
+   shape.x = 100;           // ✅ Writable - absolute page coordinates
+   shape.y = 200;           // ✅ Writable
+   shape.parentX;           // ❌ READ-ONLY
+   shape.parentY;           // ❌ READ-ONLY
+
+   // To set relative position to parent:
+   penpotUtils.setParentXY(shape, relativeX, relativeY);
+   ```
+
+4. **Resize and Dimensions**  
+   ```javascript
+   shape.width;             // ❌ READ-ONLY
+   shape.height;            // ❌ READ-ONLY
+   shape.resize(200, 100);  // ✅ Use method to change size
+   ```
+
+5. **Text Sizing**  
+   ```javascript
+   text.fontSize = '24';         // ✅ Changes text size
+   text.resize(200, 100);        // ❌ Only changes bounding box, not font
+   text.growType = 'auto-width'; // ✅ Always set after resize for auto-sizing
+   ```
+
+6. **Store Selection Immediately**  
+   ```javascript
+   storage.selection = [...penpot.selection]; // Selection can change!
+   ```
+
+### Common Code Examples
+
+**Create Shapes:**
+```javascript
+// Rectangle
+const rect = penpot.createRectangle();
+rect.name = 'Card Background';
+rect.x = 100; rect.y = 100;
+rect.resize(300, 200);
+rect.fills = [{ fillColor: '#FFFFFF' }];
+rect.borderRadius = 12;
+
+// Text
+const text = penpot.createText('Hello World');
+text.x = 120; text.y = 120;
+text.fontSize = '24';
+text.fontFamily = 'Inter';
+text.growType = 'auto-width';
+
+// Board (frame/artboard)
+const board = penpot.createBoard();
+board.name = 'Card';
+board.x = 0; board.y = 0;
+board.resize(400, 300);
+board.fills = [{ fillColor: '#FFFFFF' }];
+
+// Ellipse
+const ellipse = penpot.createEllipse();
+ellipse.resize(100, 100);
+```
+
+**Build Hierarchy:**
+**CRITICAL**: Add background shapes FIRST, then foreground shapes. Z-order = array order.
+```javascript
+const card = penpot.createBoard();
+card.resize(300, 200);
+
+// 1. Background first (will be behind)
+const bg = penpot.createRectangle();
+bg.resize(300, 200);
+bg.fills = [{ fillColor: '#F5F5F5' }];
+card.insertChild(card.children.length, bg);
+
+// 2. Content on top (will be in front)
+const title = penpot.createText('Title');
+title.fontSize = '20';
+card.insertChild(card.children.length, title);
+
+// Position relative to parent
+penpotUtils.setParentXY(bg, 0, 0);
+penpotUtils.setParentXY(title, 20, 20);
+```
+
+**Flex Layout:**
+```javascript
+const container = penpot.createBoard();
+container.resize(400, 0);
+
+// Add flex layout
+const flex = penpotUtils.addFlexLayout(container, 'column');
+flex.rowGap = 16;
+flex.columnGap = 16;
+flex.topPadding = 24;
+flex.rightPadding = 24;
+flex.bottomPadding = 24;
+flex.leftPadding = 24;
+flex.alignItems = 'stretch';
+flex.justifyContent = 'start';
+
+// For flex boards, appendChild adds at visual end
+container.appendChild(item1);
+container.appendChild(item2);
+
+// Child sizing within flex
+item1.layoutChild.horizontalSizing = 'fill';
+item1.layoutChild.verticalSizing = 'auto';
+```
+
+**Styling:**
+```javascript
+// Solid color fill
+shape.fills = [{ fillColor: '#3B82F6', fillOpacity: 1 }];
+
+// Gradient fill
+shape.fills = [{
+  fillColorGradient: {
+    type: 'linear',
+    startX: 0, startY: 0,
+    endX: 1, endY: 1,
+    width: 1,
+    stops: [
+      { color: '#3B82F6', offset: 0 },
+      { color: '#8B5CF6', offset: 1 }
+    ]
+  }
+}];
+
+// Stroke
+shape.strokes = [{
+  strokeColor: '#E5E7EB',
+  strokeWidth: 1,
+  strokeAlignment: 'center', // 'inner' | 'outer'
+  strokeStyle: 'solid'       // 'dotted' | 'dashed'
+}];
+
+// Drop shadow
+shape.shadows = [{
+  style: 'drop-shadow',  // or 'inner-shadow'
+  color: { color: '#000000', opacity: 0.1 },
+  offsetX: 0, offsetY: 4,
+  blur: 12, spread: 0
+}];
+
+// Border radius
+shape.borderRadius = 8;  // All corners
+// Or individual corners:
+shape.borderRadiusTopLeft = 8;
+shape.borderRadiusTopRight = 8;
+shape.borderRadiusBottomRight = 0;
+shape.borderRadiusBottomLeft = 0;
+```
+
+**Text Styling:**
+```javascript
+const text = penpot.createText('Hello');
+text.fontSize = '16';
+text.fontFamily = 'Inter';
+text.fontWeight = '600';
+text.fontStyle = 'normal';     // or 'italic'
+text.lineHeight = '1.5';
+text.letterSpacing = '0';
+text.align = 'center';         // 'left' | 'right' | 'justify'
+text.verticalAlign = 'center'; // 'top' | 'bottom'
+text.textTransform = 'uppercase'; // 'lowercase' | 'capitalize'
+text.textDecoration = 'underline'; // 'line-through'
+text.direction = 'ltr';        // 'rtl'
+text.growType = 'auto-width';  // 'auto-height' | 'fixed'
+
+// Text color
+text.fills = [{ fillColor: '#1F2937' }];
+```
+
+**Z-Order Methods:**
+```javascript
+shape.bringToFront();    // Move to top
+shape.sendToBack();      // Move to bottom
+shape.bringForward();    // Move up one level
+shape.sendBackward();    // Move down one level
+shape.setParentIndex(0); // Set exact position (0-based)
+```
+
+**Components & Libraries:**
+```javascript
+// Access libraries
+const local = penpot.library.local;
+const connected = penpot.library.connected;
+
+// Find component
+const btn = local.components.find(c => c.name.includes('Button'));
+
+// Create instance
+const instance = btn.instance();
+instance.x = 100; instance.y = 100;
+
+// Access colors
+const primary = local.colors.find(c => c.name === 'Primary');
+
+// Create new color
+const newColor = local.createColor();
+newColor.name = 'Brand Blue';
+newColor.color = '#3B82F6';
+```
+
 When generating structures programmatically, build **top-down**: create the outer
 Board, attach its layout (`board.addFlexLayout()` / `addGridLayout()`), then
 create children and `appendChild` in visual order. Set each child's
@@ -263,6 +483,7 @@ covers one topic:
   server works, tools, safety, setup.
 - [`references/pitfalls.md`](references/pitfalls.md) — the full list of common
   layout and design-system mistakes (with the bug-tracker links).
+- [`references/mcp-generation-guide.md`](references/mcp-generation-guide.md) — **practical guide for generating designs programmatically via MCP**: absolute coordinate system, step-by-step workflow, naming conventions, ES5 compatibility, and common code pitfalls.
 - [`checklist.md`](checklist.md) — the pre-flight validation checklist.
 
 ## Templates (worked examples)
@@ -274,3 +495,46 @@ Use as scaffolds for generation:
 - [`templates/form-layout.md`](templates/form-layout.md)
 - [`templates/modal-overlay.md`](templates/modal-overlay.md)
 - [`templates/design-system-starter.md`](templates/design-system-starter.md)
+
+## Design-to-Code
+
+Penpot's CSS-native model makes it easy to generate real code directly from your designs.
+
+### Workflow
+1. Select target element(s) in Penpot
+2. Use `export_shape` to visually verify the selection
+3. Generate CSS with `generateStyle`
+4. Generate markup with `generateMarkup`
+5. Combine into working code
+
+### Code Example
+```javascript
+// Generate CSS for selected elements
+return penpot.generateStyle(penpot.selection, {
+  type: 'css',
+  withPrelude: true,
+  includeChildren: true
+});
+
+// Generate HTML
+return penpot.generateMarkup(penpot.selection, { type: 'html' });
+
+// Or generate SVG
+return penpot.generateMarkup(penpot.selection, { type: 'svg' });
+```
+
+**CRITICAL**: Never assume values. Strictly adhere to the design. Use black/white defaults only when information is genuinely missing.
+
+## Shape Types
+
+| Type | Description |
+|------|-------------|
+| `Board` | Container/frame, supports layouts |
+| `Rectangle` | Basic rectangle shape |
+| `Ellipse` | Circle/ellipse shape |
+| `Text` | Text element |
+| `Path` | Vector path |
+| `Group` | Non-layout container |
+| `Boolean` | Boolean operations result |
+| `Image` | Image element (legacy) |
+| `SvgRaw` | Raw SVG content |
