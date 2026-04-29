@@ -1,0 +1,394 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1680 1000" width="1680" height="1000" font-family="Inter, system-ui, sans-serif">
+  <!-- ===============================================================
+       Kestrel · Ticket Lifecycle Flow
+       Three swimlanes (horizontal):
+         Product · Engineering · QA
+       Nodes = states (rounded rect) + decisions (diamond).
+       Color coding matches the status tokens used in screens 1 & 2.
+       =============================================================== -->
+  <defs>
+    <style>
+      .bg-app     { fill: #F6F7F9; }
+      .bg-surface { fill: #FFFFFF; }
+      .bg-subtle  { fill: #F1F3F6; }
+      .lane-pm    { fill: #F5F3FF; }
+      .lane-eng   { fill: #EFF6FF; }
+      .lane-qa    { fill: #FFF1F2; }
+      .lane-stroke { stroke: #E3E6EC; stroke-width: 1; fill: none; }
+      .brand       { fill: #4F46E5; }
+      .brand-soft  { fill: #EEF2FF; }
+
+      .state-todo     { fill: #FFFFFF; stroke: #64748B; stroke-width: 2; }
+      .state-todo-lbl { fill: #64748B; }
+      .state-active   { fill: #FEF3C7; stroke: #F59E0B; stroke-width: 2; }
+      .state-active-lbl { fill: #92400E; }
+      .state-done     { fill: #D1FAE5; stroke: #10B981; stroke-width: 2; }
+      .state-done-lbl { fill: #065F46; }
+      .state-reject   { fill: #FEE2E2; stroke: #EF4444; stroke-width: 2; }
+      .state-reject-lbl { fill: #991B1B; }
+      .state-brand    { fill: #EEF2FF; stroke: #4F46E5; stroke-width: 2; }
+      .state-brand-lbl{ fill: #3730A3; }
+
+      .decision       { fill: #FFFFFF; stroke: #4F46E5; stroke-width: 2; }
+      .decision-lbl   { fill: #3730A3; font-weight: 700; }
+
+      .arrow-main     { stroke: #4F46E5; stroke-width: 2.5; fill: none; }
+      .arrow-ok       { stroke: #10B981; stroke-width: 2; fill: none; }
+      .arrow-back     { stroke: #F59E0B; stroke-width: 2; fill: none; stroke-dasharray: 6 4; }
+      .arrow-reject   { stroke: #EF4444; stroke-width: 2; fill: none; stroke-dasharray: 6 4; }
+
+      .t-title  { font-size: 32px; font-weight: 700; fill: #0F172A; }
+      .t-sub    { font-size: 15px; font-weight: 400; fill: #64748B; }
+      .t-lane   { font-size: 13px; font-weight: 700; letter-spacing: 1.2px; }
+      .t-state  { font-size: 14px; font-weight: 600; }
+      .t-state-sm { font-size: 12px; font-weight: 600; }
+      .t-meta   { font-size: 11px; font-weight: 500; fill: #64748B; }
+      .t-edge   { font-size: 11px; font-weight: 600; }
+      .t-legend { font-size: 12px; fill: #475569; }
+    </style>
+
+    <!-- arrowheads -->
+    <marker id="arr-main" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#4F46E5"/>
+    </marker>
+    <marker id="arr-ok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#10B981"/>
+    </marker>
+    <marker id="arr-back" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#F59E0B"/>
+    </marker>
+    <marker id="arr-rej" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#EF4444"/>
+    </marker>
+  </defs>
+
+  <rect class="bg-app" x="0" y="0" width="1680" height="1000"/>
+
+  <!-- ============ HEADER ============ -->
+  <g transform="translate(60 54)">
+    <text class="t-title" x="0" y="0">Ticket Lifecycle</text>
+    <text class="t-sub" x="0" y="26">From first idea to shipped. Dashed arrows = return paths, solid = forward progress.</text>
+  </g>
+
+  <!-- ============ LANE BACKGROUNDS ============ -->
+  <!-- lane 1: Product  y 140-360 -->
+  <g>
+    <rect class="lane-pm"    x="60" y="140" width="1560" height="220" rx="16"/>
+    <rect class="lane-eng"   x="60" y="380" width="1560" height="260" rx="16"/>
+    <rect class="lane-qa"    x="60" y="660" width="1560" height="200" rx="16"/>
+    <rect x="60" y="140" width="1560" height="220" rx="16" class="lane-stroke"/>
+    <rect x="60" y="380" width="1560" height="260" rx="16" class="lane-stroke"/>
+    <rect x="60" y="660" width="1560" height="200" rx="16" class="lane-stroke"/>
+  </g>
+
+  <!-- lane labels -->
+  <g>
+    <g transform="translate(80 168)">
+      <rect x="0" y="0" width="96" height="24" rx="12" fill="#DDD6FE"/>
+      <text class="t-lane" x="48" y="16" text-anchor="middle" fill="#5B21B6">PRODUCT</text>
+    </g>
+    <g transform="translate(80 408)">
+      <rect x="0" y="0" width="130" height="24" rx="12" fill="#BFDBFE"/>
+      <text class="t-lane" x="65" y="16" text-anchor="middle" fill="#1E40AF">ENGINEERING</text>
+    </g>
+    <g transform="translate(80 688)">
+      <rect x="0" y="0" width="50" height="24" rx="12" fill="#FECACA"/>
+      <text class="t-lane" x="25" y="16" text-anchor="middle" fill="#991B1B">QA</text>
+    </g>
+  </g>
+
+  <!-- ============ NODES ============ -->
+  <!-- approximate node centers (cx, cy):
+       Idea        (230, 250)  PM
+       Triage ◆    (410, 250)  PM decision
+       Closed      (410, 150)  PM terminal — NOT placed (rule: lane boundary); we'll use drop-down
+       Actually put Closed/Duplicate at far-right terminal, lane=PM
+       Backlog     (590, 250)  PM
+       Sprint Plan (760, 500)  ENG
+       In Progress (940, 500)  ENG
+       Blocked     (940, 380 top lane fold) — NO, put alongside
+       Review      (1120, 500) ENG
+       QA Test     (1300, 760) QA
+       Done        (1480, 760) QA (terminal)
+       Closed      (1480, 250) PM (terminal)
+  -->
+
+  <!-- Node: Idea -->
+  <g transform="translate(170 210)">
+    <rect x="0" y="0" width="140" height="80" rx="12" class="state-todo"/>
+    <text class="t-state" x="70" y="34" text-anchor="middle" fill="#475569">Idea</text>
+    <text class="t-meta" x="70" y="54" text-anchor="middle">user / PM / support</text>
+    <text class="t-meta" x="70" y="68" text-anchor="middle">captured in Intake</text>
+  </g>
+
+  <!-- Node: Triage (diamond) -->
+  <g transform="translate(410 250)">
+    <path d="M 0 -56 L 90 0 L 0 56 L -90 0 Z" class="decision"/>
+    <text class="decision-lbl t-state" x="0" y="-6" text-anchor="middle">Triage</text>
+    <text class="t-meta" x="0" y="14" text-anchor="middle" fill="#64748B">valuable?</text>
+    <text class="t-meta" x="0" y="28" text-anchor="middle" fill="#64748B">in scope?</text>
+  </g>
+
+  <!-- Node: Backlog -->
+  <g transform="translate(620 210)">
+    <rect x="0" y="0" width="140" height="80" rx="12" class="state-brand"/>
+    <text class="t-state state-brand-lbl" x="70" y="34" text-anchor="middle">Backlog</text>
+    <text class="t-meta" x="70" y="54" text-anchor="middle">prioritised,</text>
+    <text class="t-meta" x="70" y="68" text-anchor="middle">estimated</text>
+  </g>
+
+  <!-- Node: Closed (PM terminal) -->
+  <g transform="translate(1400 210)">
+    <rect x="0" y="0" width="160" height="80" rx="12" class="state-reject"/>
+    <circle cx="26" cy="40" r="12" fill="#FCA5A5"/>
+    <line x1="20" y1="40" x2="32" y2="40" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"/>
+    <text class="t-state state-reject-lbl" x="96" y="36" text-anchor="middle">Closed</text>
+    <text class="t-meta" x="96" y="54" text-anchor="middle">rejected · duplicate</text>
+    <text class="t-meta" x="96" y="68" text-anchor="middle">· won't fix · stale</text>
+  </g>
+
+  <!-- Node: Sprint Plan -->
+  <g transform="translate(250 460)">
+    <rect x="0" y="0" width="160" height="80" rx="12" class="state-brand"/>
+    <text class="t-state state-brand-lbl" x="80" y="34" text-anchor="middle">Sprint Plan</text>
+    <text class="t-meta" x="80" y="54" text-anchor="middle">pulled into sprint,</text>
+    <text class="t-meta" x="80" y="68" text-anchor="middle">assigned, pointed</text>
+  </g>
+
+  <!-- Node: In Progress -->
+  <g transform="translate(500 460)">
+    <rect x="0" y="0" width="160" height="80" rx="12" class="state-active"/>
+    <circle cx="26" cy="40" r="10" fill="#F59E0B"/>
+    <path d="M26 34 L26 40 L30 43" stroke="#FFFFFF" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <text class="t-state state-active-lbl" x="96" y="34" text-anchor="middle">In Progress</text>
+    <text class="t-meta" x="96" y="54" text-anchor="middle">branch + WIP,</text>
+    <text class="t-meta" x="96" y="68" text-anchor="middle">subtasks tracked</text>
+  </g>
+
+  <!-- Node: Blocked (side loop above In Progress, still ENG lane) -->
+  <g transform="translate(500 394)">
+    <rect x="0" y="0" width="160" height="52" rx="10" fill="#FEE2E2" stroke="#EF4444" stroke-width="1.5" stroke-dasharray="4 3"/>
+    <circle cx="22" cy="26" r="8" fill="#EF4444"/>
+    <line x1="22" y1="20" x2="22" y2="28" stroke="#FFFFFF" stroke-width="2"/>
+    <circle cx="22" cy="32" r="1.5" fill="#FFFFFF"/>
+    <text class="t-state-sm" x="90" y="24" text-anchor="middle" fill="#991B1B">Blocked</text>
+    <text class="t-meta" x="90" y="40" text-anchor="middle">external dep / info</text>
+  </g>
+
+  <!-- Decision: PR opened? (diamond after In Progress) -->
+  <g transform="translate(780 500)">
+    <path d="M 0 -50 L 80 0 L 0 50 L -80 0 Z" class="decision"/>
+    <text class="decision-lbl t-state-sm" x="0" y="-4" text-anchor="middle">PR opened</text>
+    <text class="decision-lbl t-state-sm" x="0" y="12" text-anchor="middle">ready?</text>
+  </g>
+
+  <!-- Node: Code Review -->
+  <g transform="translate(900 460)">
+    <rect x="0" y="0" width="160" height="80" rx="12" class="state-active"/>
+    <circle cx="26" cy="40" r="10" fill="#F59E0B"/>
+    <path d="M20 36 L24 40 L32 32" stroke="#FFFFFF" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <text class="t-state state-active-lbl" x="96" y="34" text-anchor="middle">Code Review</text>
+    <text class="t-meta" x="96" y="54" text-anchor="middle">peer review,</text>
+    <text class="t-meta" x="96" y="68" text-anchor="middle">CI must pass</text>
+  </g>
+
+  <!-- Decision: Approved? -->
+  <g transform="translate(1180 500)">
+    <path d="M 0 -50 L 80 0 L 0 50 L -80 0 Z" class="decision"/>
+    <text class="decision-lbl t-state-sm" x="0" y="-4" text-anchor="middle">Approved</text>
+    <text class="decision-lbl t-state-sm" x="0" y="12" text-anchor="middle">+ merged?</text>
+  </g>
+
+  <!-- Node: Merged → Staging -->
+  <g transform="translate(1300 460)">
+    <rect x="0" y="0" width="160" height="80" rx="12" class="state-brand"/>
+    <text class="t-state state-brand-lbl" x="80" y="34" text-anchor="middle">Merged</text>
+    <text class="t-meta" x="80" y="54" text-anchor="middle">deployed to</text>
+    <text class="t-meta" x="80" y="68" text-anchor="middle">staging env</text>
+  </g>
+
+  <!-- Node: QA Test -->
+  <g transform="translate(900 720)">
+    <rect x="0" y="0" width="160" height="80" rx="12" class="state-active"/>
+    <circle cx="26" cy="40" r="10" fill="#F59E0B"/>
+    <text class="t-state state-active-lbl" x="96" y="34" text-anchor="middle">QA Test</text>
+    <text class="t-meta" x="96" y="54" text-anchor="middle">manual &amp; automated</text>
+    <text class="t-meta" x="96" y="68" text-anchor="middle">regression suite</text>
+  </g>
+
+  <!-- Decision: QA pass? -->
+  <g transform="translate(1180 760)">
+    <path d="M 0 -50 L 80 0 L 0 50 L -80 0 Z" class="decision"/>
+    <text class="decision-lbl t-state-sm" x="0" y="-4" text-anchor="middle">QA pass?</text>
+    <text class="decision-lbl t-state-sm" x="0" y="12" text-anchor="middle"></text>
+  </g>
+
+  <!-- Node: Done -->
+  <g transform="translate(1300 720)">
+    <rect x="0" y="0" width="160" height="80" rx="12" class="state-done"/>
+    <circle cx="26" cy="40" r="12" fill="#10B981"/>
+    <path d="M20 40 L24 44 L32 34" stroke="#FFFFFF" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <text class="t-state state-done-lbl" x="96" y="36" text-anchor="middle">Done</text>
+    <text class="t-meta" x="96" y="54" text-anchor="middle">shipped to prod,</text>
+    <text class="t-meta" x="96" y="68" text-anchor="middle">closed · metrics logged</text>
+  </g>
+
+  <!-- ============ EDGES ============ -->
+
+  <!-- Idea → Triage -->
+  <path class="arrow-main" d="M 310 250 L 320 250" marker-end="url(#arr-main)"/>
+
+  <!-- Triage → Backlog (yes) -->
+  <path class="arrow-ok" d="M 500 250 L 620 250" marker-end="url(#arr-ok)"/>
+  <g transform="translate(540 240)">
+    <rect x="0" y="0" width="40" height="18" rx="4" fill="#D1FAE5"/>
+    <text class="t-edge" x="20" y="13" text-anchor="middle" fill="#065F46">yes</text>
+  </g>
+
+  <!-- Triage → Closed (no / duplicate) -->
+  <path class="arrow-reject" d="M 410 306 L 410 340 L 1480 340 L 1480 210" marker-end="url(#arr-rej)"/>
+  <g transform="translate(700 326)">
+    <rect x="0" y="0" width="96" height="20" rx="4" fill="#FEE2E2"/>
+    <text class="t-edge" x="48" y="15" text-anchor="middle" fill="#991B1B">no / duplicate</text>
+  </g>
+
+  <!-- Backlog → Sprint Plan (down into ENG lane) -->
+  <path class="arrow-main" d="M 690 290 L 690 420 L 410 420 L 410 460" marker-end="url(#arr-main)"/>
+  <g transform="translate(444 402)">
+    <rect x="0" y="0" width="100" height="20" rx="4" class="brand-soft"/>
+    <text class="t-edge" x="50" y="15" text-anchor="middle" fill="#3730A3">pulled into sprint</text>
+  </g>
+
+  <!-- Sprint Plan → In Progress -->
+  <path class="arrow-main" d="M 410 500 L 500 500" marker-end="url(#arr-main)"/>
+
+  <!-- In Progress ↔ Blocked (loop up and back) -->
+  <path class="arrow-back" d="M 580 460 L 580 446" marker-end="url(#arr-back)"/>
+  <path class="arrow-back" d="M 600 446 L 600 460" marker-end="url(#arr-back)"/>
+  <g transform="translate(610 430)">
+    <text class="t-edge" x="0" y="10" fill="#92400E">blocks</text>
+  </g>
+
+  <!-- In Progress → PR decision -->
+  <path class="arrow-main" d="M 660 500 L 700 500" marker-end="url(#arr-main)"/>
+
+  <!-- PR decision → Code Review (yes) -->
+  <path class="arrow-ok" d="M 860 500 L 900 500" marker-end="url(#arr-ok)"/>
+  <g transform="translate(864 482)">
+    <rect x="0" y="0" width="32" height="16" rx="4" fill="#D1FAE5"/>
+    <text class="t-edge" x="16" y="12" text-anchor="middle" fill="#065F46">yes</text>
+  </g>
+
+  <!-- PR decision → back to In Progress (no, not ready) -->
+  <path class="arrow-back" d="M 780 550 L 780 580 L 580 580 L 580 540" marker-end="url(#arr-back)"/>
+  <g transform="translate(620 560)">
+    <rect x="0" y="0" width="112" height="18" rx="4" fill="#FEF3C7"/>
+    <text class="t-edge" x="56" y="13" text-anchor="middle" fill="#92400E">not ready / WIP</text>
+  </g>
+
+  <!-- Code Review → Approved decision -->
+  <path class="arrow-main" d="M 1060 500 L 1100 500" marker-end="url(#arr-main)"/>
+
+  <!-- Approved → Merged (yes) -->
+  <path class="arrow-ok" d="M 1260 500 L 1300 500" marker-end="url(#arr-ok)"/>
+  <g transform="translate(1262 482)">
+    <rect x="0" y="0" width="32" height="16" rx="4" fill="#D1FAE5"/>
+    <text class="t-edge" x="16" y="12" text-anchor="middle" fill="#065F46">yes</text>
+  </g>
+
+  <!-- Approved → rework (no) back to In Progress -->
+  <path class="arrow-back" d="M 1180 550 L 1180 610 L 580 610 L 580 540" marker-end="url(#arr-back)"/>
+  <g transform="translate(800 590)">
+    <rect x="0" y="0" width="120" height="18" rx="4" fill="#FEF3C7"/>
+    <text class="t-edge" x="60" y="13" text-anchor="middle" fill="#92400E">rework requested</text>
+  </g>
+
+  <!-- Merged → QA Test (drop into QA lane) -->
+  <path class="arrow-main" d="M 1380 540 L 1380 660 L 980 660 L 980 720" marker-end="url(#arr-main)"/>
+  <g transform="translate(1060 644)">
+    <rect x="0" y="0" width="104" height="18" rx="4" class="brand-soft"/>
+    <text class="t-edge" x="52" y="13" text-anchor="middle" fill="#3730A3">deployed → test</text>
+  </g>
+
+  <!-- QA → decision -->
+  <path class="arrow-main" d="M 1060 760 L 1100 760" marker-end="url(#arr-main)"/>
+
+  <!-- decision → Done (pass) -->
+  <path class="arrow-ok" d="M 1260 760 L 1300 760" marker-end="url(#arr-ok)"/>
+  <g transform="translate(1262 742)">
+    <rect x="0" y="0" width="32" height="16" rx="4" fill="#D1FAE5"/>
+    <text class="t-edge" x="16" y="12" text-anchor="middle" fill="#065F46">pass</text>
+  </g>
+
+  <!-- decision → In Progress (fail) - back up across lanes -->
+  <path class="arrow-back" d="M 1180 710 L 1180 640 L 580 640 L 580 540" marker-end="url(#arr-back)"/>
+  <g transform="translate(830 622)">
+    <rect x="0" y="0" width="104" height="18" rx="4" fill="#FEF3C7"/>
+    <text class="t-edge" x="52" y="13" text-anchor="middle" fill="#92400E">QA fail / bug</text>
+  </g>
+
+  <!-- ============ LEGEND ============ -->
+  <g transform="translate(60 900)">
+    <rect x="0" y="0" width="1560" height="78" rx="12" class="bg-surface" stroke="#E3E6EC"/>
+
+    <g transform="translate(20 16)">
+      <text class="t-lane" x="0" y="12" fill="#0F172A">LEGEND</text>
+
+      <g transform="translate(0 24)">
+        <rect x="0" y="0" width="60" height="20" rx="6" class="state-todo"/>
+        <text class="t-state-sm" x="30" y="14" text-anchor="middle" fill="#475569">state</text>
+        <text class="t-legend" x="70" y="14">idle / ready</text>
+      </g>
+
+      <g transform="translate(180 24)">
+        <rect x="0" y="0" width="60" height="20" rx="6" class="state-active"/>
+        <text class="t-state-sm" x="30" y="14" text-anchor="middle" fill="#92400E">state</text>
+        <text class="t-legend" x="70" y="14">in motion</text>
+      </g>
+
+      <g transform="translate(340 24)">
+        <rect x="0" y="0" width="60" height="20" rx="6" class="state-done"/>
+        <text class="t-state-sm" x="30" y="14" text-anchor="middle" fill="#065F46">state</text>
+        <text class="t-legend" x="70" y="14">terminal (good)</text>
+      </g>
+
+      <g transform="translate(520 24)">
+        <rect x="0" y="0" width="60" height="20" rx="6" class="state-reject"/>
+        <text class="t-state-sm" x="30" y="14" text-anchor="middle" fill="#991B1B">state</text>
+        <text class="t-legend" x="70" y="14">terminal (rejected)</text>
+      </g>
+
+      <g transform="translate(720 24)">
+        <path d="M 0 10 L 12 2 L 24 10 L 12 18 Z" class="decision"/>
+        <text class="t-legend" x="32" y="14">decision point</text>
+      </g>
+
+      <g transform="translate(870 24)">
+        <line x1="0" y1="10" x2="30" y2="10" class="arrow-main" marker-end="url(#arr-main)"/>
+        <text class="t-legend" x="42" y="14">forward (main path)</text>
+      </g>
+
+      <g transform="translate(1060 24)">
+        <line x1="0" y1="10" x2="30" y2="10" class="arrow-ok" marker-end="url(#arr-ok)"/>
+        <text class="t-legend" x="42" y="14">positive branch</text>
+      </g>
+
+      <g transform="translate(1230 24)">
+        <line x1="0" y1="10" x2="30" y2="10" class="arrow-back" marker-end="url(#arr-back)"/>
+        <text class="t-legend" x="42" y="14">rework / loop back</text>
+      </g>
+
+      <g transform="translate(1420 24)">
+        <line x1="0" y1="10" x2="30" y2="10" class="arrow-reject" marker-end="url(#arr-rej)"/>
+        <text class="t-legend" x="42" y="14">rejected exit</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- file footer chip -->
+  <g transform="translate(1500 964)">
+    <rect x="0" y="0" width="160" height="24" rx="12" class="bg-surface" stroke="#E3E6EC"/>
+    <text x="80" y="16" text-anchor="middle" fill="#64748B" font-size="11" font-weight="500">flow · ticket lifecycle</text>
+  </g>
+</svg>

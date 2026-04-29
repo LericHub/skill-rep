@@ -1,0 +1,492 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 900" width="1440" height="900" font-family="Inter, system-ui, sans-serif">
+  <!-- ===============================================================
+       Kestrel · Sprint Board
+       Board-structure reflection (desktop 1440×900):
+       screen (flex column)
+       ├─ header (flex row, justify: space-between, fill × fix64, sticky)
+       └─ body (flex row, fill × fill)
+          ├─ sidebar (flex column, fix240 × fill)
+          └─ main (flex column, fill × fill)
+             ├─ page-header (flex row, justify: space-between)
+             ├─ filter-bar (flex row, gap8)
+             └─ columns (grid, 3 × 1fr, gap24)
+                ├─ column "To Do"       (flex column, gap12)
+                ├─ column "In Progress" (flex column, gap12)
+                └─ column "Done"        (flex column, gap12)
+       =============================================================== -->
+  <defs>
+    <style>
+      /* semantic tokens */
+      .bg-app       { fill: #F6F7F9; }
+      .bg-surface   { fill: #FFFFFF; }
+      .bg-subtle    { fill: #F1F3F6; }
+      .bg-hover     { fill: #EEF0F4; }
+      .border       { stroke: #E3E6EC; stroke-width: 1; fill: none; }
+      .border-f     { fill: #E3E6EC; }
+      .text-primary   { fill: #0F172A; }
+      .text-secondary { fill: #64748B; }
+      .text-tertiary  { fill: #94A3B8; }
+      .brand        { fill: #4F46E5; }
+      .brand-soft   { fill: #EEF2FF; }
+      .status-todo     { fill: #64748B; }
+      .status-progress { fill: #F59E0B; }
+      .status-done     { fill: #10B981; }
+      .status-danger   { fill: #EF4444; }
+      .status-progress-soft { fill: #FEF3C7; }
+      .status-done-soft     { fill: #D1FAE5; }
+      .status-todo-soft     { fill: #E2E8F0; }
+      .status-danger-soft   { fill: #FEE2E2; }
+
+      .t-h1  { font-size: 22px; font-weight: 700; fill: #0F172A; }
+      .t-h2  { font-size: 15px; font-weight: 600; fill: #0F172A; }
+      .t-h3  { font-size: 13px; font-weight: 600; fill: #0F172A; }
+      .t-body   { font-size: 13px; font-weight: 400; fill: #334155; }
+      .t-muted  { font-size: 12px; font-weight: 400; fill: #64748B; }
+      .t-micro  { font-size: 11px; font-weight: 500; fill: #64748B; }
+      .t-count  { font-size: 11px; font-weight: 600; fill: #64748B; }
+      .t-brand  { font-size: 13px; font-weight: 600; fill: #4F46E5; }
+      .t-white  { fill: #FFFFFF; }
+    </style>
+  </defs>
+
+  <!-- app background -->
+  <rect class="bg-app" x="0" y="0" width="1440" height="900"/>
+
+  <!-- ============ HEADER (fill × fix64) ============ -->
+  <g id="header">
+    <rect class="bg-surface" x="0" y="0" width="1440" height="64"/>
+    <line x1="0" y1="64" x2="1440" y2="64" class="border"/>
+
+    <!-- left: brand -->
+    <g transform="translate(24 20)">
+      <rect x="0" y="0" width="24" height="24" rx="6" class="brand"/>
+      <path d="M7 17 L7 7 L12 12 L17 7 L17 17" stroke="#FFFFFF" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <text class="t-h2" x="36" y="17">Kestrel</text>
+      <text class="t-muted" x="36" y="34" font-size="11">Acme Engineering · Sprint 24</text>
+    </g>
+
+    <!-- center: search -->
+    <g transform="translate(440 16)">
+      <rect x="0" y="0" width="560" height="32" rx="8" class="bg-subtle"/>
+      <circle cx="18" cy="16" r="5" stroke="#94A3B8" stroke-width="1.5" fill="none"/>
+      <line x1="22" y1="20" x2="26" y2="24" stroke="#94A3B8" stroke-width="1.5" stroke-linecap="round"/>
+      <text class="t-muted" x="40" y="20">Search tickets, people, sprints…</text>
+      <rect x="510" y="6" width="42" height="20" rx="4" class="bg-surface"/>
+      <text class="t-micro" x="517" y="20">⌘ K</text>
+    </g>
+
+    <!-- right: + New · bell · avatar -->
+    <g transform="translate(1180 14)">
+      <rect x="0" y="0" width="96" height="36" rx="8" class="brand"/>
+      <text x="14" y="23" class="t-white" font-size="16" font-weight="600">+</text>
+      <text x="32" y="23" class="t-white" font-size="13" font-weight="600">New ticket</text>
+
+      <g transform="translate(112 0)">
+        <rect x="0" y="0" width="36" height="36" rx="8" class="bg-subtle"/>
+        <path d="M10 24 L10 15 a8 8 0 0 1 16 0 L26 24 Z" stroke="#475569" stroke-width="1.5" fill="none" stroke-linejoin="round"/>
+        <circle cx="25" cy="8" r="4" class="status-danger"/>
+      </g>
+
+      <g transform="translate(160 0)">
+        <circle cx="18" cy="18" r="18" fill="#D1D5DB"/>
+        <text x="18" y="23" text-anchor="middle" font-size="13" font-weight="600" fill="#374151">LM</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- ============ SIDEBAR (fix240 × fill) ============ -->
+  <g id="sidebar">
+    <rect class="bg-surface" x="0" y="64" width="240" height="836"/>
+    <line x1="240" y1="64" x2="240" y2="900" class="border"/>
+
+    <!-- team switcher -->
+    <g transform="translate(16 84)">
+      <rect x="0" y="0" width="208" height="48" rx="10" class="bg-subtle"/>
+      <rect x="8" y="8" width="32" height="32" rx="7" fill="#111827"/>
+      <text x="24" y="29" text-anchor="middle" font-size="13" font-weight="700" fill="#FFFFFF">A</text>
+      <text x="48" y="23" class="t-h3">Acme · Web</text>
+      <text x="48" y="38" class="t-muted">12 members</text>
+      <path d="M190 22 L196 28 L202 22" stroke="#64748B" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+
+    <!-- nav -->
+    <g transform="translate(16 152)" font-size="13">
+      <text class="t-micro" x="8" y="0" letter-spacing="0.5">WORK</text>
+
+      <g transform="translate(0 12)">
+        <rect x="0" y="0" width="208" height="36" rx="8" class="brand-soft"/>
+        <rect x="8" y="10" width="16" height="16" rx="3" fill="none" stroke="#4F46E5" stroke-width="1.5"/>
+        <line x1="10" y1="15" x2="22" y2="15" stroke="#4F46E5" stroke-width="1.5"/>
+        <text x="36" y="22" class="t-brand">Sprint board</text>
+        <rect x="168" y="10" width="30" height="16" rx="4" class="brand"/>
+        <text x="183" y="22" text-anchor="middle" class="t-white" font-size="11" font-weight="600">42</text>
+      </g>
+
+      <g transform="translate(0 56)">
+        <rect x="8" y="10" width="16" height="16" rx="3" fill="none" stroke="#64748B" stroke-width="1.5"/>
+        <text x="36" y="22" class="t-body" font-weight="500">Backlog</text>
+        <text x="192" y="22" class="t-muted" text-anchor="end">128</text>
+      </g>
+
+      <g transform="translate(0 92)">
+        <path d="M10 14 L14 18 L22 10" stroke="#64748B" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        <text x="36" y="22" class="t-body" font-weight="500">My work</text>
+      </g>
+
+      <g transform="translate(0 128)">
+        <circle cx="16" cy="18" r="6" stroke="#64748B" stroke-width="1.5" fill="none"/>
+        <text x="36" y="22" class="t-body" font-weight="500">Reports</text>
+      </g>
+
+      <g transform="translate(0 164)">
+        <path d="M10 18 L22 18 M10 14 L22 14 M10 22 L18 22" stroke="#64748B" stroke-width="1.5" stroke-linecap="round"/>
+        <text x="36" y="22" class="t-body" font-weight="500">Roadmap</text>
+      </g>
+
+      <text class="t-micro" x="8" y="220" letter-spacing="0.5">FAVORITES</text>
+
+      <g transform="translate(0 232)">
+        <rect x="10" y="13" width="12" height="12" rx="3" class="status-progress"/>
+        <text x="36" y="22" class="t-body" font-weight="500">Checkout v2</text>
+      </g>
+
+      <g transform="translate(0 268)">
+        <rect x="10" y="13" width="12" height="12" rx="3" class="status-done"/>
+        <text x="36" y="22" class="t-body" font-weight="500">Auth revamp</text>
+      </g>
+
+      <g transform="translate(0 304)">
+        <rect x="10" y="13" width="12" height="12" rx="3" class="brand"/>
+        <text x="36" y="22" class="t-body" font-weight="500">Billing</text>
+      </g>
+    </g>
+
+    <!-- footer: settings -->
+    <g transform="translate(16 840)">
+      <circle cx="16" cy="18" r="7" stroke="#64748B" stroke-width="1.5" fill="none"/>
+      <circle cx="16" cy="18" r="2" fill="#64748B"/>
+      <text x="36" y="22" class="t-body" font-weight="500">Settings</text>
+    </g>
+  </g>
+
+  <!-- ============ MAIN ============ -->
+  <g id="main" transform="translate(240 64)">
+
+    <!-- page header (flex row, justify: space-between) -->
+    <g id="page-header">
+      <!-- left: breadcrumb + title -->
+      <g transform="translate(32 28)">
+        <text class="t-muted">Acme · Web / Sprints</text>
+        <text class="t-h1" x="0" y="28">Sprint 24 · Week of Apr 28</text>
+        <text class="t-muted" x="0" y="50">5 days remaining · 42 tickets · 78 story points</text>
+      </g>
+      <!-- right: people + action bar -->
+      <g transform="translate(760 32)">
+        <!-- avatar stack -->
+        <g>
+          <circle cx="16" cy="16" r="14" fill="#FCA5A5" stroke="#FFFFFF" stroke-width="2"/>
+          <text x="16" y="20" text-anchor="middle" font-size="11" font-weight="600" fill="#7F1D1D">JT</text>
+          <circle cx="40" cy="16" r="14" fill="#93C5FD" stroke="#FFFFFF" stroke-width="2"/>
+          <text x="40" y="20" text-anchor="middle" font-size="11" font-weight="600" fill="#1E3A8A">SA</text>
+          <circle cx="64" cy="16" r="14" fill="#86EFAC" stroke="#FFFFFF" stroke-width="2"/>
+          <text x="64" y="20" text-anchor="middle" font-size="11" font-weight="600" fill="#14532D">RK</text>
+          <circle cx="88" cy="16" r="14" fill="#FDE68A" stroke="#FFFFFF" stroke-width="2"/>
+          <text x="88" y="20" text-anchor="middle" font-size="11" font-weight="600" fill="#78350F">MP</text>
+          <circle cx="112" cy="16" r="14" fill="#E5E7EB" stroke="#FFFFFF" stroke-width="2"/>
+          <text x="112" y="20" text-anchor="middle" font-size="11" font-weight="600" fill="#374151">+8</text>
+        </g>
+        <!-- export / filter pill buttons -->
+        <g transform="translate(148 0)">
+          <rect x="0" y="0" width="88" height="32" rx="8" fill="#FFFFFF" stroke="#E3E6EC"/>
+          <path d="M12 16 L18 10 L24 16 M18 10 L18 22" stroke="#475569" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+          <text x="32" y="21" class="t-body" font-weight="500">Export</text>
+        </g>
+        <g transform="translate(244 0)">
+          <rect x="0" y="0" width="168" height="32" rx="8" class="brand"/>
+          <circle cx="16" cy="16" r="4" fill="#FFFFFF"/>
+          <text x="30" y="21" class="t-white" font-size="13" font-weight="600">Complete sprint</text>
+        </g>
+      </g>
+    </g>
+
+    <!-- filter bar -->
+    <g id="filter-bar" transform="translate(32 124)">
+      <rect x="0" y="0" width="1136" height="48" rx="10" class="bg-surface" stroke="#E3E6EC"/>
+      <!-- chip: All -->
+      <g transform="translate(12 10)">
+        <rect x="0" y="0" width="50" height="28" rx="6" class="brand"/>
+        <text x="25" y="19" text-anchor="middle" class="t-white" font-size="12" font-weight="600">All</text>
+      </g>
+      <g transform="translate(68 10)">
+        <rect x="0" y="0" width="76" height="28" rx="6" class="bg-subtle"/>
+        <text x="38" y="19" text-anchor="middle" class="t-body" font-weight="500">My tickets</text>
+      </g>
+      <g transform="translate(150 10)">
+        <rect x="0" y="0" width="92" height="28" rx="6" class="bg-subtle"/>
+        <text x="46" y="19" text-anchor="middle" class="t-body" font-weight="500">Blocked (3)</text>
+      </g>
+      <g transform="translate(248 10)">
+        <rect x="0" y="0" width="112" height="28" rx="6" class="bg-subtle"/>
+        <text x="56" y="19" text-anchor="middle" class="t-body" font-weight="500">Needs review (7)</text>
+      </g>
+      <line x1="376" y1="10" x2="376" y2="38" class="border"/>
+      <g transform="translate(394 10)">
+        <rect x="0" y="0" width="104" height="28" rx="6" fill="none" stroke="#E3E6EC"/>
+        <circle cx="14" cy="14" r="4" fill="#F59E0B"/>
+        <text x="24" y="19" class="t-body" font-weight="500">Priority: All</text>
+      </g>
+      <g transform="translate(504 10)">
+        <rect x="0" y="0" width="100" height="28" rx="6" fill="none" stroke="#E3E6EC"/>
+        <text x="14" y="19" class="t-body" font-weight="500">Assignee: Any</text>
+      </g>
+      <g transform="translate(610 10)">
+        <rect x="0" y="0" width="88" height="28" rx="6" fill="none" stroke="#E3E6EC"/>
+        <text x="14" y="19" class="t-body" font-weight="500">Label: None</text>
+      </g>
+      <!-- view switcher -->
+      <g transform="translate(1020 8)">
+        <rect x="0" y="0" width="104" height="32" rx="8" class="bg-subtle"/>
+        <rect x="4" y="4" width="48" height="24" rx="6" class="bg-surface" stroke="#E3E6EC"/>
+        <text x="28" y="20" text-anchor="middle" class="t-body" font-weight="600">Board</text>
+        <text x="78" y="20" text-anchor="middle" class="t-muted">List</text>
+      </g>
+    </g>
+
+    <!-- ============ COLUMNS (grid, 3 × 1fr, gap24) ============ -->
+    <g id="columns" transform="translate(32 188)">
+
+      <!-- == COLUMN 1: TO DO == -->
+      <g id="col-todo">
+        <!-- column header -->
+        <g>
+          <rect x="0" y="0" width="362" height="44" rx="10" class="bg-subtle"/>
+          <circle cx="16" cy="22" r="5" class="status-todo"/>
+          <text x="28" y="27" class="t-h3">To Do</text>
+          <rect x="68" y="14" width="22" height="16" rx="4" class="border-f"/>
+          <text x="79" y="26" text-anchor="middle" class="t-count">14</text>
+          <text x="340" y="26" text-anchor="middle" class="t-muted" font-size="16" font-weight="600">⋯</text>
+        </g>
+
+        <!-- card 1 -->
+        <g transform="translate(0 56)">
+          <rect x="0" y="0" width="362" height="128" rx="10" class="bg-surface" stroke="#E3E6EC"/>
+          <g transform="translate(14 14)">
+            <rect x="0" y="0" width="58" height="20" rx="4" class="status-danger-soft"/>
+            <text x="29" y="14" text-anchor="middle" font-size="11" font-weight="600" fill="#B91C1C">P0 · BUG</text>
+            <text x="314" y="14" text-anchor="end" class="t-micro">KES-2184</text>
+          </g>
+          <text x="14" y="58" class="t-h3" font-weight="600">Checkout freezes when applying 2+ coupons</text>
+          <text x="14" y="78" class="t-body" font-size="12">Users report the spinner never resolves. Repro on Safari.</text>
+          <g transform="translate(14 96)">
+            <rect x="0" y="0" width="58" height="20" rx="4" class="bg-subtle"/>
+            <text x="29" y="14" text-anchor="middle" font-size="11" font-weight="600" fill="#475569">checkout</text>
+            <rect x="66" y="0" width="42" height="20" rx="4" class="bg-subtle"/>
+            <text x="87" y="14" text-anchor="middle" font-size="11" font-weight="600" fill="#475569">web</text>
+            <circle cx="324" cy="10" r="10" fill="#FCA5A5"/>
+            <text x="324" y="14" text-anchor="middle" font-size="10" font-weight="600" fill="#7F1D1D">JT</text>
+            <text x="280" y="14" class="t-muted" font-size="11" text-anchor="end">5 pts</text>
+          </g>
+        </g>
+
+        <!-- card 2 -->
+        <g transform="translate(0 200)">
+          <rect x="0" y="0" width="362" height="112" rx="10" class="bg-surface" stroke="#E3E6EC"/>
+          <g transform="translate(14 14)">
+            <rect x="0" y="0" width="68" height="20" rx="4" class="status-progress-soft"/>
+            <text x="34" y="14" text-anchor="middle" font-size="11" font-weight="600" fill="#92400E">P1 · FEATURE</text>
+            <text x="314" y="14" text-anchor="end" class="t-micro">KES-2190</text>
+          </g>
+          <text x="14" y="58" class="t-h3" font-weight="600">Add Apple Pay to checkout</text>
+          <text x="14" y="78" class="t-body" font-size="12">Phase 1: iOS Safari only. Phase 2: desktop.</text>
+          <g transform="translate(14 92)">
+            <rect x="0" y="0" width="58" height="16" rx="4" class="bg-subtle"/>
+            <text x="29" y="12" text-anchor="middle" font-size="10" font-weight="600" fill="#475569">checkout</text>
+            <circle cx="324" cy="6" r="10" fill="#93C5FD"/>
+            <text x="324" y="10" text-anchor="middle" font-size="10" font-weight="600" fill="#1E3A8A">SA</text>
+            <text x="280" y="10" class="t-muted" font-size="11" text-anchor="end">8 pts</text>
+          </g>
+        </g>
+
+        <!-- card 3 -->
+        <g transform="translate(0 328)">
+          <rect x="0" y="0" width="362" height="96" rx="10" class="bg-surface" stroke="#E3E6EC"/>
+          <g transform="translate(14 14)">
+            <rect x="0" y="0" width="44" height="20" rx="4" class="bg-subtle"/>
+            <text x="22" y="14" text-anchor="middle" font-size="11" font-weight="600" fill="#475569">P2</text>
+            <text x="314" y="14" text-anchor="end" class="t-micro">KES-2196</text>
+          </g>
+          <text x="14" y="58" class="t-h3" font-weight="600">Consolidate empty-state illustrations</text>
+          <g transform="translate(14 72)">
+            <rect x="0" y="0" width="50" height="16" rx="4" class="bg-subtle"/>
+            <text x="25" y="12" text-anchor="middle" font-size="10" font-weight="600" fill="#475569">design</text>
+            <circle cx="324" cy="6" r="10" fill="#FDE68A"/>
+            <text x="324" y="10" text-anchor="middle" font-size="10" font-weight="600" fill="#78350F">MP</text>
+            <text x="280" y="10" class="t-muted" font-size="11" text-anchor="end">2 pts</text>
+          </g>
+        </g>
+
+        <!-- add card ghost -->
+        <g transform="translate(0 440)">
+          <rect x="0" y="0" width="362" height="40" rx="10" fill="none" stroke="#CBD5E1" stroke-dasharray="4 4"/>
+          <text x="181" y="25" text-anchor="middle" class="t-muted">+ Add ticket</text>
+        </g>
+      </g>
+
+      <!-- == COLUMN 2: IN PROGRESS == -->
+      <g id="col-progress" transform="translate(386 0)">
+        <g>
+          <rect x="0" y="0" width="362" height="44" rx="10" class="bg-subtle"/>
+          <circle cx="16" cy="22" r="5" class="status-progress"/>
+          <text x="28" y="27" class="t-h3">In Progress</text>
+          <rect x="108" y="14" width="22" height="16" rx="4" class="status-progress-soft"/>
+          <text x="119" y="26" text-anchor="middle" font-size="11" font-weight="600" fill="#92400E">7</text>
+          <text x="340" y="26" text-anchor="middle" class="t-muted" font-size="16" font-weight="600">⋯</text>
+        </g>
+
+        <g transform="translate(0 56)">
+          <rect x="0" y="0" width="362" height="148" rx="10" class="bg-surface" stroke="#E3E6EC"/>
+          <rect x="0" y="0" width="4" height="148" rx="2" class="status-progress"/>
+          <g transform="translate(14 14)">
+            <rect x="0" y="0" width="68" height="20" rx="4" class="status-progress-soft"/>
+            <text x="34" y="14" text-anchor="middle" font-size="11" font-weight="600" fill="#92400E">P1 · FEATURE</text>
+            <text x="314" y="14" text-anchor="end" class="t-micro">KES-2175</text>
+          </g>
+          <text x="14" y="58" class="t-h3" font-weight="600">Migrate settings to new design system</text>
+          <text x="14" y="78" class="t-body" font-size="12">Replace legacy &lt;Button&gt; + &lt;Input&gt; with v2 components.</text>
+          <!-- progress bar -->
+          <g transform="translate(14 92)">
+            <rect x="0" y="0" width="334" height="6" rx="3" class="bg-subtle"/>
+            <rect x="0" y="0" width="200" height="6" rx="3" class="status-progress"/>
+            <text x="0" y="22" class="t-micro">12 of 20 subtasks</text>
+          </g>
+          <g transform="translate(14 118)">
+            <rect x="0" y="0" width="48" height="16" rx="4" class="bg-subtle"/>
+            <text x="24" y="12" text-anchor="middle" font-size="10" font-weight="600" fill="#475569">design</text>
+            <rect x="56" y="0" width="38" height="16" rx="4" class="bg-subtle"/>
+            <text x="75" y="12" text-anchor="middle" font-size="10" font-weight="600" fill="#475569">web</text>
+            <circle cx="324" cy="6" r="10" fill="#86EFAC"/>
+            <text x="324" y="10" text-anchor="middle" font-size="10" font-weight="600" fill="#14532D">RK</text>
+            <text x="280" y="10" class="t-muted" font-size="11" text-anchor="end">13 pts</text>
+          </g>
+        </g>
+
+        <g transform="translate(0 220)">
+          <rect x="0" y="0" width="362" height="128" rx="10" class="bg-surface" stroke="#E3E6EC"/>
+          <rect x="0" y="0" width="4" height="128" rx="2" class="status-danger"/>
+          <g transform="translate(14 14)">
+            <rect x="0" y="0" width="58" height="20" rx="4" class="status-danger-soft"/>
+            <text x="29" y="14" text-anchor="middle" font-size="11" font-weight="600" fill="#B91C1C">BLOCKED</text>
+            <text x="314" y="14" text-anchor="end" class="t-micro">KES-2168</text>
+          </g>
+          <text x="14" y="58" class="t-h3" font-weight="600">Billing retries on 402</text>
+          <text x="14" y="78" class="t-body" font-size="12">Waiting on Stripe sandbox keys from finance.</text>
+          <g transform="translate(14 96)">
+            <rect x="0" y="0" width="52" height="20" rx="4" class="bg-subtle"/>
+            <text x="26" y="14" text-anchor="middle" font-size="11" font-weight="600" fill="#475569">billing</text>
+            <circle cx="324" cy="10" r="10" fill="#FCA5A5"/>
+            <text x="324" y="14" text-anchor="middle" font-size="10" font-weight="600" fill="#7F1D1D">JT</text>
+            <text x="280" y="14" class="t-muted" font-size="11" text-anchor="end">8 pts</text>
+          </g>
+        </g>
+
+        <g transform="translate(0 364)">
+          <rect x="0" y="0" width="362" height="112" rx="10" class="bg-surface" stroke="#E3E6EC"/>
+          <rect x="0" y="0" width="4" height="112" rx="2" class="status-progress"/>
+          <g transform="translate(14 14)">
+            <rect x="0" y="0" width="44" height="20" rx="4" class="bg-subtle"/>
+            <text x="22" y="14" text-anchor="middle" font-size="11" font-weight="600" fill="#475569">P2</text>
+            <text x="314" y="14" text-anchor="end" class="t-micro">KES-2181</text>
+          </g>
+          <text x="14" y="58" class="t-h3" font-weight="600">Sprint velocity chart on reports page</text>
+          <g transform="translate(14 80)">
+            <rect x="0" y="0" width="46" height="16" rx="4" class="bg-subtle"/>
+            <text x="23" y="12" text-anchor="middle" font-size="10" font-weight="600" fill="#475569">reports</text>
+            <circle cx="324" cy="6" r="10" fill="#93C5FD"/>
+            <text x="324" y="10" text-anchor="middle" font-size="10" font-weight="600" fill="#1E3A8A">SA</text>
+            <text x="280" y="10" class="t-muted" font-size="11" text-anchor="end">5 pts</text>
+          </g>
+        </g>
+
+        <g transform="translate(0 492)">
+          <rect x="0" y="0" width="362" height="40" rx="10" fill="none" stroke="#CBD5E1" stroke-dasharray="4 4"/>
+          <text x="181" y="25" text-anchor="middle" class="t-muted">4 more in progress</text>
+        </g>
+      </g>
+
+      <!-- == COLUMN 3: DONE == -->
+      <g id="col-done" transform="translate(772 0)">
+        <g>
+          <rect x="0" y="0" width="362" height="44" rx="10" class="bg-subtle"/>
+          <circle cx="16" cy="22" r="5" class="status-done"/>
+          <text x="28" y="27" class="t-h3">Done</text>
+          <rect x="58" y="14" width="22" height="16" rx="4" class="status-done-soft"/>
+          <text x="69" y="26" text-anchor="middle" font-size="11" font-weight="600" fill="#065F46">21</text>
+          <text x="340" y="26" text-anchor="middle" class="t-muted" font-size="16" font-weight="600">⋯</text>
+        </g>
+
+        <g transform="translate(0 56)">
+          <rect x="0" y="0" width="362" height="112" rx="10" class="bg-surface" stroke="#E3E6EC" opacity="0.9"/>
+          <g transform="translate(14 14)">
+            <rect x="0" y="0" width="44" height="20" rx="4" class="status-done-soft"/>
+            <text x="22" y="14" text-anchor="middle" font-size="11" font-weight="600" fill="#065F46">DONE</text>
+            <text x="314" y="14" text-anchor="end" class="t-micro">KES-2140</text>
+          </g>
+          <text x="14" y="58" class="t-h3" font-weight="600" text-decoration="line-through" fill="#64748B">OAuth token refresh on 401</text>
+          <g transform="translate(14 80)">
+            <rect x="0" y="0" width="38" height="16" rx="4" class="bg-subtle"/>
+            <text x="19" y="12" text-anchor="middle" font-size="10" font-weight="600" fill="#475569">auth</text>
+            <circle cx="324" cy="6" r="10" fill="#86EFAC"/>
+            <text x="324" y="10" text-anchor="middle" font-size="10" font-weight="600" fill="#14532D">RK</text>
+            <text x="280" y="10" class="t-muted" font-size="11" text-anchor="end">3 pts</text>
+          </g>
+        </g>
+
+        <g transform="translate(0 184)">
+          <rect x="0" y="0" width="362" height="96" rx="10" class="bg-surface" stroke="#E3E6EC" opacity="0.9"/>
+          <g transform="translate(14 14)">
+            <rect x="0" y="0" width="44" height="20" rx="4" class="status-done-soft"/>
+            <text x="22" y="14" text-anchor="middle" font-size="11" font-weight="600" fill="#065F46">DONE</text>
+            <text x="314" y="14" text-anchor="end" class="t-micro">KES-2152</text>
+          </g>
+          <text x="14" y="58" class="t-h3" font-weight="600" text-decoration="line-through" fill="#64748B">Dashboard KPI tiles responsive</text>
+          <g transform="translate(14 72)">
+            <rect x="0" y="0" width="46" height="16" rx="4" class="bg-subtle"/>
+            <text x="23" y="12" text-anchor="middle" font-size="10" font-weight="600" fill="#475569">reports</text>
+            <circle cx="324" cy="6" r="10" fill="#FDE68A"/>
+            <text x="324" y="10" text-anchor="middle" font-size="10" font-weight="600" fill="#78350F">MP</text>
+            <text x="280" y="10" class="t-muted" font-size="11" text-anchor="end">5 pts</text>
+          </g>
+        </g>
+
+        <g transform="translate(0 296)">
+          <rect x="0" y="0" width="362" height="96" rx="10" class="bg-surface" stroke="#E3E6EC" opacity="0.9"/>
+          <g transform="translate(14 14)">
+            <rect x="0" y="0" width="44" height="20" rx="4" class="status-done-soft"/>
+            <text x="22" y="14" text-anchor="middle" font-size="11" font-weight="600" fill="#065F46">DONE</text>
+            <text x="314" y="14" text-anchor="end" class="t-micro">KES-2160</text>
+          </g>
+          <text x="14" y="58" class="t-h3" font-weight="600" text-decoration="line-through" fill="#64748B">Audit log export · CSV</text>
+          <g transform="translate(14 72)">
+            <rect x="0" y="0" width="54" height="16" rx="4" class="bg-subtle"/>
+            <text x="27" y="12" text-anchor="middle" font-size="10" font-weight="600" fill="#475569">security</text>
+            <circle cx="324" cy="6" r="10" fill="#FCA5A5"/>
+            <text x="324" y="10" text-anchor="middle" font-size="10" font-weight="600" fill="#7F1D1D">JT</text>
+            <text x="280" y="10" class="t-muted" font-size="11" text-anchor="end">8 pts</text>
+          </g>
+        </g>
+
+        <g transform="translate(0 408)">
+          <rect x="0" y="0" width="362" height="40" rx="10" fill="none" stroke="#CBD5E1" stroke-dasharray="4 4"/>
+          <text x="181" y="25" text-anchor="middle" class="t-muted">18 more done this sprint</text>
+        </g>
+      </g>
+    </g>
+  </g>
+
+  <!-- Screen title chip (meta) -->
+  <g transform="translate(1280 864)">
+    <rect x="0" y="0" width="140" height="24" rx="12" class="bg-surface" stroke="#E3E6EC"/>
+    <text x="70" y="16" text-anchor="middle" class="t-micro">screen 1 · board view</text>
+  </g>
+</svg>

@@ -1,0 +1,366 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 900" width="1440" height="900" font-family="Inter, system-ui, sans-serif">
+  <!-- ===============================================================
+       Kestrel · Ticket Detail (Overlay pattern)
+       Structure mirrors /templates/modal-overlay.md:
+
+       backdrop (absolute full-screen dimmer)
+       overlay "overlay/ticket" (flex column, fix 960 × auto, centered)
+         ├─ header    (flex row, justify: space-between)
+         ├─ body      (flex row, fill × fill)
+         │    ├─ main-col   (flex column, fill, rowGap 24)
+         │    │    ├─ title-block
+         │    │    ├─ description
+         │    │    ├─ subtasks (flex column)
+         │    │    └─ activity (flex column)
+         │    └─ side-col   (flex column, fix 280, rowGap 20)
+         │         ├─ metadata group (each row = flex row space-between)
+         │         └─ linked work
+         └─ footer    (flex row, justify: space-between) — comment input
+       =============================================================== -->
+  <defs>
+    <style>
+      .dim          { fill: rgba(15,23,42,0.55); }
+      .bg-surface   { fill: #FFFFFF; }
+      .bg-subtle    { fill: #F1F3F6; }
+      .bg-dim       { fill: #F6F7F9; }
+      .border       { stroke: #E3E6EC; stroke-width: 1; fill: none; }
+      .text-primary   { fill: #0F172A; }
+      .text-secondary { fill: #64748B; }
+      .text-tertiary  { fill: #94A3B8; }
+      .brand        { fill: #4F46E5; }
+      .brand-soft   { fill: #EEF2FF; }
+      .status-todo         { fill: #64748B; }
+      .status-progress     { fill: #F59E0B; }
+      .status-done         { fill: #10B981; }
+      .status-danger       { fill: #EF4444; }
+      .status-progress-soft{ fill: #FEF3C7; }
+      .status-done-soft    { fill: #D1FAE5; }
+      .status-danger-soft  { fill: #FEE2E2; }
+      .status-todo-soft    { fill: #E2E8F0; }
+
+      .t-h1     { font-size: 22px; font-weight: 700; fill: #0F172A; }
+      .t-h2     { font-size: 15px; font-weight: 600; fill: #0F172A; }
+      .t-h3     { font-size: 13px; font-weight: 600; fill: #0F172A; }
+      .t-label  { font-size: 11px; font-weight: 600; fill: #64748B; letter-spacing: 0.5px; }
+      .t-body   { font-size: 13px; font-weight: 400; fill: #334155; }
+      .t-muted  { font-size: 12px; font-weight: 400; fill: #64748B; }
+      .t-micro  { font-size: 11px; font-weight: 500; fill: #64748B; }
+      .t-brand  { font-size: 13px; font-weight: 600; fill: #4F46E5; }
+      .t-white  { fill: #FFFFFF; }
+      .t-link   { fill: #4F46E5; font-size: 13px; font-weight: 500; }
+    </style>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="24" stdDeviation="32" flood-color="#0F172A" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+
+  <!-- ===== backdrop: dimmed sprint board silhouette ===== -->
+  <rect x="0" y="0" width="1440" height="900" fill="#F6F7F9"/>
+  <!-- faint sidebar silhouette -->
+  <rect x="0" y="0" width="240" height="900" fill="#FFFFFF"/>
+  <rect x="0" y="0" width="1440" height="64" fill="#FFFFFF"/>
+  <line x1="240" y1="0" x2="240" y2="900" class="border"/>
+  <line x1="0" y1="64" x2="1440" y2="64" class="border"/>
+  <!-- faint column headers as hint of underlying board -->
+  <g opacity="0.5">
+    <rect x="272" y="252" width="360" height="44" rx="10" class="bg-subtle"/>
+    <rect x="640" y="252" width="360" height="44" rx="10" class="bg-subtle"/>
+    <rect x="1008" y="252" width="360" height="44" rx="10" class="bg-subtle"/>
+    <rect x="272" y="308" width="360" height="120" rx="10" fill="#FFFFFF" stroke="#E3E6EC"/>
+    <rect x="640" y="308" width="360" height="120" rx="10" fill="#FFFFFF" stroke="#E3E6EC"/>
+    <rect x="1008" y="308" width="360" height="120" rx="10" fill="#FFFFFF" stroke="#E3E6EC"/>
+  </g>
+
+  <!-- ===== dim scrim (covers everything behind the modal) ===== -->
+  <rect x="0" y="0" width="1440" height="900" class="dim"/>
+
+  <!-- ===== modal overlay (flex column, fix 960 × auto) ===== -->
+  <!-- we center at x=(1440-960)/2=240, y=60 -->
+  <g transform="translate(240 60)" filter="url(#shadow)">
+    <rect x="0" y="0" width="960" height="780" rx="14" class="bg-surface"/>
+
+    <!-- == HEADER == -->
+    <g>
+      <line x1="0" y1="64" x2="960" y2="64" class="border"/>
+
+      <!-- left: breadcrumb/id/status -->
+      <g transform="translate(24 22)">
+        <text class="t-muted" x="0" y="0">Sprint 24 / Checkout</text>
+        <g transform="translate(142 -12)">
+          <rect x="0" y="0" width="88" height="22" rx="5" class="status-progress-soft"/>
+          <circle cx="12" cy="11" r="4" class="status-progress"/>
+          <text x="22" y="15" font-size="11" font-weight="600" fill="#92400E">In Progress</text>
+        </g>
+        <text class="t-micro" x="246" y="3">KES-2175</text>
+      </g>
+
+      <!-- right: actions -->
+      <g transform="translate(700 14)">
+        <!-- watch -->
+        <g>
+          <rect x="0" y="0" width="84" height="36" rx="8" class="bg-subtle"/>
+          <circle cx="18" cy="18" r="6" fill="none" stroke="#475569" stroke-width="1.5"/>
+          <circle cx="18" cy="18" r="2" fill="#475569"/>
+          <text x="32" y="22" class="t-body" font-weight="500">Watch</text>
+        </g>
+        <!-- share -->
+        <g transform="translate(92 0)">
+          <rect x="0" y="0" width="84" height="36" rx="8" class="bg-subtle"/>
+          <path d="M14 22 L14 14 L26 14 M26 14 L22 10 M26 14 L22 18" stroke="#475569" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+          <text x="32" y="22" class="t-body" font-weight="500">Share</text>
+        </g>
+        <!-- overflow -->
+        <g transform="translate(184 0)">
+          <rect x="0" y="0" width="36" height="36" rx="8" class="bg-subtle"/>
+          <circle cx="13" cy="18" r="1.8" fill="#475569"/>
+          <circle cx="18" cy="18" r="1.8" fill="#475569"/>
+          <circle cx="23" cy="18" r="1.8" fill="#475569"/>
+        </g>
+        <!-- close -->
+        <g transform="translate(228 0)">
+          <rect x="0" y="0" width="36" height="36" rx="8" class="bg-subtle"/>
+          <line x1="12" y1="12" x2="24" y2="24" stroke="#475569" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="24" y1="12" x2="12" y2="24" stroke="#475569" stroke-width="1.5" stroke-linecap="round"/>
+        </g>
+      </g>
+    </g>
+
+    <!-- == BODY (flex row: main 610 | side 310) == -->
+    <g transform="translate(0 64)">
+
+      <!-- ========= MAIN COL (fill) ========= -->
+      <g id="main-col" transform="translate(24 24)">
+
+        <!-- title -->
+        <text x="0" y="0" class="t-h1">Migrate settings to new design system</text>
+        <text x="0" y="26" class="t-muted">Created by Rahul K · Apr 21 · Updated 14m ago</text>
+
+        <!-- label chips row -->
+        <g transform="translate(0 44)">
+          <rect x="0" y="0" width="68" height="24" rx="6" class="status-progress-soft"/>
+          <text x="34" y="16" text-anchor="middle" font-size="11" font-weight="600" fill="#92400E">P1 · FEATURE</text>
+          <rect x="76" y="0" width="54" height="24" rx="6" class="bg-subtle"/>
+          <text x="103" y="16" text-anchor="middle" font-size="11" font-weight="600" fill="#475569">design</text>
+          <rect x="138" y="0" width="38" height="24" rx="6" class="bg-subtle"/>
+          <text x="157" y="16" text-anchor="middle" font-size="11" font-weight="600" fill="#475569">web</text>
+          <rect x="184" y="0" width="68" height="24" rx="6" class="brand-soft"/>
+          <text x="218" y="16" text-anchor="middle" font-size="11" font-weight="600" fill="#4F46E5">checkout</text>
+        </g>
+
+        <!-- description block -->
+        <g transform="translate(0 88)">
+          <text class="t-label" x="0" y="0">DESCRIPTION</text>
+          <text x="0" y="22" class="t-body">Replace every legacy <tspan font-family="monospace" fill="#4F46E5">&lt;Button&gt;</tspan> / <tspan font-family="monospace" fill="#4F46E5">&lt;Input&gt;</tspan> / <tspan font-family="monospace" fill="#4F46E5">&lt;Select&gt;</tspan> in /settings with the v2</text>
+          <text x="0" y="42" class="t-body">components. Prereq for the settings IA refresh in Sprint 25. Non-goal: visual</text>
+          <text x="0" y="62" class="t-body">redesign — visual parity is required.</text>
+
+          <!-- callout -->
+          <g transform="translate(0 82)">
+            <rect x="0" y="0" width="588" height="56" rx="8" fill="#FEF3C7" stroke="#F59E0B" stroke-width="1" stroke-opacity="0.4"/>
+            <circle cx="20" cy="28" r="8" class="status-progress"/>
+            <text x="20" y="33" text-anchor="middle" font-size="12" font-weight="700" fill="#FFFFFF">!</text>
+            <text x="40" y="24" class="t-h3">Watch for Billing coupling</text>
+            <text x="40" y="42" class="t-body" font-size="12">/settings/billing shares form state with /billing — coordinate with Jamie.</text>
+          </g>
+        </g>
+
+        <!-- subtasks -->
+        <g transform="translate(0 258)">
+          <g>
+            <text class="t-label" x="0" y="0">SUBTASKS</text>
+            <rect x="70" y="-10" width="44" height="16" rx="4" class="bg-subtle"/>
+            <text x="92" y="2" text-anchor="middle" font-size="10" font-weight="600" fill="#475569">12 / 20</text>
+          </g>
+
+          <!-- progress bar -->
+          <g transform="translate(0 12)">
+            <rect x="0" y="0" width="588" height="6" rx="3" class="bg-subtle"/>
+            <rect x="0" y="0" width="352" height="6" rx="3" class="status-progress"/>
+          </g>
+
+          <!-- subtask rows -->
+          <g transform="translate(0 30)" font-size="13">
+            <g>
+              <rect x="0" y="0" width="588" height="32" rx="6" fill="#FFFFFF"/>
+              <rect x="10" y="10" width="14" height="14" rx="3" class="status-done"/>
+              <path d="M13 17 L16 20 L21 13" stroke="#FFFFFF" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+              <text x="34" y="20" class="t-body" text-decoration="line-through" fill="#94A3B8">Audit usage of legacy Button/Input</text>
+              <text x="560" y="20" text-anchor="end" class="t-micro">KES-2176</text>
+            </g>
+            <g transform="translate(0 34)">
+              <rect x="0" y="0" width="588" height="32" rx="6" fill="#FFFFFF"/>
+              <rect x="10" y="10" width="14" height="14" rx="3" class="status-done"/>
+              <path d="M13 17 L16 20 L21 13" stroke="#FFFFFF" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+              <text x="34" y="20" class="t-body" text-decoration="line-through" fill="#94A3B8">Migrate /settings/profile</text>
+              <text x="560" y="20" text-anchor="end" class="t-micro">KES-2177</text>
+            </g>
+            <g transform="translate(0 68)">
+              <rect x="0" y="0" width="588" height="32" rx="6" class="bg-dim"/>
+              <rect x="10" y="10" width="14" height="14" rx="3" fill="none" stroke="#F59E0B" stroke-width="1.5"/>
+              <circle cx="17" cy="17" r="3" class="status-progress"/>
+              <text x="34" y="20" class="t-body" font-weight="500">Migrate /settings/notifications</text>
+              <circle cx="540" cy="16" r="8" fill="#86EFAC"/>
+              <text x="540" y="20" text-anchor="middle" font-size="9" font-weight="600" fill="#14532D">RK</text>
+              <text x="560" y="20" text-anchor="end" class="t-micro">KES-2178</text>
+            </g>
+            <g transform="translate(0 102)">
+              <rect x="0" y="0" width="588" height="32" rx="6" fill="#FFFFFF"/>
+              <rect x="10" y="10" width="14" height="14" rx="3" fill="none" stroke="#CBD5E1" stroke-width="1.5"/>
+              <text x="34" y="20" class="t-body">Migrate /settings/billing (coord. w/ JT)</text>
+              <text x="560" y="20" text-anchor="end" class="t-micro">KES-2179</text>
+            </g>
+            <g transform="translate(0 136)">
+              <rect x="0" y="0" width="588" height="32" rx="6" fill="#FFFFFF"/>
+              <rect x="10" y="10" width="14" height="14" rx="3" fill="none" stroke="#CBD5E1" stroke-width="1.5"/>
+              <text x="34" y="20" class="t-body">Delete legacy component from /packages/ui-v1</text>
+              <text x="560" y="20" text-anchor="end" class="t-micro">KES-2180</text>
+            </g>
+            <g transform="translate(0 178)">
+              <text x="0" y="0" class="t-muted" font-size="12">+ 15 more subtasks</text>
+            </g>
+          </g>
+        </g>
+
+        <!-- activity -->
+        <g transform="translate(0 494)">
+          <text class="t-label" x="0" y="0">ACTIVITY</text>
+
+          <g transform="translate(0 16)">
+            <circle cx="14" cy="14" r="12" fill="#86EFAC"/>
+            <text x="14" y="18" text-anchor="middle" font-size="10" font-weight="600" fill="#14532D">RK</text>
+            <text x="34" y="14" class="t-h3">Rahul K</text>
+            <text x="88" y="14" class="t-muted">moved this from <tspan font-weight="600" fill="#64748B">To Do</tspan> to <tspan font-weight="600" fill="#92400E">In Progress</tspan></text>
+            <text x="34" y="30" class="t-micro">2 hours ago</text>
+          </g>
+
+          <g transform="translate(0 62)">
+            <circle cx="14" cy="14" r="12" fill="#FCA5A5"/>
+            <text x="14" y="18" text-anchor="middle" font-size="10" font-weight="600" fill="#7F1D1D">JT</text>
+            <text x="34" y="14" class="t-h3">Jamie T</text>
+            <text x="80" y="14" class="t-muted">commented</text>
+            <g transform="translate(34 22)">
+              <rect x="0" y="0" width="540" height="46" rx="8" class="bg-dim"/>
+              <text x="14" y="20" class="t-body">Don't forget /settings/billing shares state with /billing —</text>
+              <text x="14" y="36" class="t-body">suggest adding a Storybook smoke test before merge.</text>
+            </g>
+            <text x="34" y="86" class="t-micro">14 minutes ago · Reply</text>
+          </g>
+        </g>
+      </g>
+
+      <!-- ========= SIDE COL (fix 280) ========= -->
+      <g id="side-col" transform="translate(634 24)">
+        <line x1="0" y1="-24" x2="0" y2="668" class="border"/>
+
+        <g transform="translate(24 0)">
+
+          <!-- Status -->
+          <g>
+            <text class="t-label" x="0" y="0">STATUS</text>
+            <g transform="translate(0 10)">
+              <rect x="0" y="0" width="260" height="36" rx="8" class="status-progress-soft" stroke="#F59E0B" stroke-opacity="0.4"/>
+              <circle cx="16" cy="18" r="5" class="status-progress"/>
+              <text x="28" y="23" font-size="13" font-weight="600" fill="#92400E">In Progress</text>
+              <path d="M242 16 L248 22 L254 16" stroke="#92400E" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+            </g>
+          </g>
+
+          <!-- Assignee -->
+          <g transform="translate(0 72)">
+            <text class="t-label" x="0" y="0">ASSIGNEE</text>
+            <g transform="translate(0 10)">
+              <circle cx="14" cy="14" r="12" fill="#86EFAC"/>
+              <text x="14" y="18" text-anchor="middle" font-size="10" font-weight="600" fill="#14532D">RK</text>
+              <text x="34" y="18" class="t-h3">Rahul Kapoor</text>
+              <text x="230" y="18" text-anchor="middle" class="t-link">Change</text>
+            </g>
+          </g>
+
+          <!-- Reporter -->
+          <g transform="translate(0 124)">
+            <text class="t-label" x="0" y="0">REPORTER</text>
+            <g transform="translate(0 10)">
+              <circle cx="14" cy="14" r="12" fill="#FDE68A"/>
+              <text x="14" y="18" text-anchor="middle" font-size="10" font-weight="600" fill="#78350F">MP</text>
+              <text x="34" y="18" class="t-h3">Mia Park</text>
+            </g>
+          </g>
+
+          <!-- Priority -->
+          <g transform="translate(0 176)">
+            <text class="t-label" x="0" y="0">PRIORITY</text>
+            <g transform="translate(0 10)">
+              <path d="M4 16 L10 8 L16 16 L10 12 Z" fill="#F59E0B"/>
+              <text x="24" y="19" class="t-body" font-weight="600">P1 · High</text>
+            </g>
+          </g>
+
+          <!-- Sprint / points -->
+          <g transform="translate(0 222)">
+            <text class="t-label" x="0" y="0">SPRINT</text>
+            <text x="0" y="22" class="t-body" font-weight="500">Sprint 24 · Apr 28 — May 9</text>
+            <text class="t-label" x="0" y="48">STORY POINTS</text>
+            <rect x="0" y="58" width="40" height="24" rx="6" class="bg-subtle"/>
+            <text x="20" y="74" text-anchor="middle" font-size="13" font-weight="700" fill="#0F172A">13</text>
+          </g>
+
+          <!-- Labels -->
+          <g transform="translate(0 326)">
+            <text class="t-label" x="0" y="0">LABELS</text>
+            <g transform="translate(0 12)">
+              <rect x="0" y="0" width="54" height="24" rx="6" class="bg-subtle"/>
+              <text x="27" y="16" text-anchor="middle" font-size="11" font-weight="600" fill="#475569">design</text>
+              <rect x="62" y="0" width="38" height="24" rx="6" class="bg-subtle"/>
+              <text x="81" y="16" text-anchor="middle" font-size="11" font-weight="600" fill="#475569">web</text>
+              <rect x="108" y="0" width="68" height="24" rx="6" class="brand-soft"/>
+              <text x="142" y="16" text-anchor="middle" font-size="11" font-weight="600" fill="#4F46E5">checkout</text>
+            </g>
+          </g>
+
+          <!-- Linked work -->
+          <g transform="translate(0 404)">
+            <text class="t-label" x="0" y="0">LINKED WORK</text>
+            <g transform="translate(0 12)">
+              <rect x="0" y="0" width="260" height="44" rx="8" fill="#FFFFFF" stroke="#E3E6EC"/>
+              <rect x="10" y="12" width="6" height="20" rx="2" class="brand"/>
+              <text x="22" y="20" class="t-h3" font-size="12">Blocked by</text>
+              <text x="22" y="36" class="t-body" font-size="12" fill="#64748B">KES-2168 · Billing retries on 402</text>
+            </g>
+            <g transform="translate(0 62)">
+              <rect x="0" y="0" width="260" height="44" rx="8" fill="#FFFFFF" stroke="#E3E6EC"/>
+              <rect x="10" y="12" width="6" height="20" rx="2" class="status-todo"/>
+              <text x="22" y="20" class="t-h3" font-size="12">Relates to</text>
+              <text x="22" y="36" class="t-body" font-size="12" fill="#64748B">KES-2195 · Settings IA refresh</text>
+            </g>
+            <text x="0" y="130" class="t-link">+ Link ticket</text>
+          </g>
+        </g>
+      </g>
+    </g>
+
+    <!-- == FOOTER (comment bar) == -->
+    <g transform="translate(0 716)">
+      <line x1="0" y1="0" x2="960" y2="0" class="border"/>
+      <g transform="translate(24 16)">
+        <circle cx="16" cy="16" r="14" fill="#D1D5DB"/>
+        <text x="16" y="20" text-anchor="middle" font-size="11" font-weight="600" fill="#374151">LM</text>
+
+        <rect x="40" y="0" width="712" height="32" rx="8" class="bg-subtle"/>
+        <text x="54" y="20" class="t-muted">Add a comment · @ to mention, / for actions</text>
+
+        <rect x="760" y="0" width="72" height="32" rx="8" class="bg-surface" stroke="#E3E6EC"/>
+        <text x="796" y="20" text-anchor="middle" class="t-body" font-weight="500">Draft</text>
+
+        <rect x="840" y="0" width="72" height="32" rx="8" class="brand"/>
+        <text x="876" y="20" text-anchor="middle" class="t-white" font-size="13" font-weight="600">Comment</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- Screen title chip -->
+  <g transform="translate(1270 864)">
+    <rect x="0" y="0" width="150" height="24" rx="12" fill="#FFFFFF" stroke="#E3E6EC"/>
+    <text x="75" y="16" text-anchor="middle" class="t-micro">screen 2 · ticket overlay</text>
+  </g>
+</svg>

@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1320" width="1920" height="1320" font-family="Inter, system-ui, sans-serif">
+  <defs>
+    <style>
+      .bg       { fill: #0F1115; }
+      .title    { fill: #FFFFFF; font-size: 44px; font-weight: 700; }
+      .subtitle { fill: #9CA3AF; font-size: 18px; font-weight: 400; }
+      .center   { fill: #6366F1; }
+      .center-t { fill: #FFFFFF; font-size: 22px; font-weight: 700; }
+      .node     { stroke: #2A2F3A; stroke-width: 1; }
+      .node-l   { fill: #FFFFFF; font-size: 16px; font-weight: 600; }
+      .leaf-t   { fill: #CBD5E1; font-size: 13px; }
+      .edge     { stroke: #3F3F46; stroke-width: 1.5; fill: none; }
+      .legend   { fill: #6B7280; font-size: 12px; }
+      .pill     { fill: #1F2937; stroke: #374151; stroke-width: 1; }
+      .pill-t   { fill: #E5E7EB; font-size: 12px; }
+      .layers   { fill: #10B981; }
+      .layout   { fill: #F59E0B; }
+      .pages    { fill: #06B6D4; }
+      .comp     { fill: #EC4899; }
+      .proto    { fill: #8B5CF6; }
+      .tokens   { fill: #EAB308; }
+      .api      { fill: #EF4444; }
+      .format   { fill: #14B8A6; }
+      .best     { fill: #3B82F6; }
+    </style>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1920" height="1320"/>
+
+  <text class="title" x="60" y="74">Penpot Exploration Map</text>
+  <text class="subtitle" x="60" y="104">Research → distilled skill. Features, relationships, and the rules that prevent overlap.</text>
+
+  <!-- Center hub -->
+  <g transform="translate(960 660)">
+    <circle class="center" r="90"/>
+    <text class="center-t" text-anchor="middle" y="-8">Penpot</text>
+    <text class="center-t" text-anchor="middle" y="22" font-size="14" font-weight="500" fill="#C7D2FE">Open-source design tool</text>
+  </g>
+
+  <!-- ============ 9 spokes ============ -->
+
+  <!-- 1. LAYERS (top-left) -->
+  <g>
+    <path class="edge" d="M 910 620 Q 700 500 480 360"/>
+    <g transform="translate(300 300)">
+      <rect class="node layers" x="0" y="0" rx="14" ry="14" width="260" height="62"/>
+      <text class="node-l" x="130" y="38" text-anchor="middle">1. Layers &amp; Shapes</text>
+    </g>
+    <g transform="translate(60 380)">
+      <rect class="pill" x="0" y="0" rx="6" ry="6" width="230" height="24"/><text class="pill-t" x="12" y="16">Board (the primary container)</text>
+      <rect class="pill" x="0" y="32" rx="6" ry="6" width="230" height="24"/><text class="pill-t" x="12" y="48">Group (non-clipping bundle)</text>
+      <rect class="pill" x="0" y="64" rx="6" ry="6" width="230" height="24"/><text class="pill-t" x="12" y="80">Rect · Ellipse · Path · Text · Image</text>
+      <rect class="pill" x="0" y="96" rx="6" ry="6" width="230" height="24"/><text class="pill-t" x="12" y="112">Boolean: Union/Diff/Inter/Excl/Flatten</text>
+      <rect class="pill" x="0" y="128" rx="6" ry="6" width="230" height="24"/><text class="pill-t" x="12" y="144">Mask (Ctrl+M, bottom = clip)</text>
+      <rect class="pill" x="0" y="160" rx="6" ry="6" width="230" height="24"/><text class="pill-t" x="12" y="176">Z-order via layer panel</text>
+      <rect class="pill" x="0" y="192" rx="6" ry="6" width="230" height="24"/><text class="pill-t" x="12" y="208">Hide · Lock · Nest (cap 3–4)</text>
+    </g>
+  </g>
+
+  <!-- 2. LAYOUT (top) -->
+  <g>
+    <path class="edge" d="M 960 570 L 960 360"/>
+    <g transform="translate(820 300)">
+      <rect class="node layout" x="0" y="0" rx="14" ry="14" width="280" height="62"/>
+      <text class="node-l" x="140" y="38" text-anchor="middle">2. Layout (Flex · Grid)</text>
+    </g>
+    <g transform="translate(820 70)">
+      <rect class="pill" x="0" y="0" rx="6" ry="6" width="280" height="24"/><text class="pill-t" x="12" y="16">FLEX · direction/wrap/justify/align/gap</text>
+      <rect class="pill" x="0" y="32" rx="6" ry="6" width="280" height="24"/><text class="pill-t" x="12" y="48">GRID · rows/cols (fr/auto/px), areas</text>
+      <rect class="pill" x="0" y="64" rx="6" ry="6" width="280" height="24"/><text class="pill-t" x="12" y="80">Sizing per child: Fix / Fill / Auto(Hug)</text>
+      <rect class="pill" x="0" y="96" rx="6" ry="6" width="280" height="24"/><text class="pill-t" x="12" y="112">Absolute + zIndex = intended overlap</text>
+      <rect class="pill" x="0" y="128" rx="6" ry="6" width="280" height="24"/><text class="pill-t" x="12" y="144">Constraints (pin/scale) for non-layout</text>
+      <rect class="pill" x="0" y="160" rx="6" ry="6" width="280" height="24"/><text class="pill-t" x="12" y="176">⚠ Never mix constraints + flex/grid</text>
+      <rect class="pill" x="0" y="192" rx="6" ry="6" width="280" height="24"/><text class="pill-t" x="12" y="208">Text growType: fixed/auto-w/auto-h</text>
+    </g>
+  </g>
+
+  <!-- 3. PAGES (top-right) -->
+  <g>
+    <path class="edge" d="M 1010 620 Q 1220 500 1440 360"/>
+    <g transform="translate(1360 300)">
+      <rect class="node pages" x="0" y="0" rx="14" ry="14" width="260" height="62"/>
+      <text class="node-l" x="130" y="38" text-anchor="middle">3. Pages &amp; Libraries</text>
+    </g>
+    <g transform="translate(1640 380)">
+      <rect class="pill" x="0" y="0" rx="6" ry="6" width="230" height="24"/><text class="pill-t" x="12" y="16">Multiple pages per file</text>
+      <rect class="pill" x="0" y="32" rx="6" ry="6" width="230" height="24"/><text class="pill-t" x="12" y="48">Each page = own ShapeTree</text>
+      <rect class="pill" x="0" y="64" rx="6" ry="6" width="230" height="24"/><text class="pill-t" x="12" y="80">Publish file → shared library</text>
+      <rect class="pill" x="0" y="96" rx="6" ry="6" width="230" height="24"/><text class="pill-t" x="12" y="112">Assets: components, colors, type</text>
+      <rect class="pill" x="0" y="128" rx="6" ry="6" width="230" height="24"/><text class="pill-t" x="12" y="144">Slash-grouping: folder / asset</text>
+      <rect class="pill" x="0" y="160" rx="6" ry="6" width="230" height="24"/><text class="pill-t" x="12" y="176">Assets panel · Alt/⌥ + I</text>
+    </g>
+  </g>
+
+  <!-- 4. COMPONENTS (right) -->
+  <g>
+    <path class="edge" d="M 1050 660 L 1460 660"/>
+    <g transform="translate(1460 628)">
+      <rect class="node comp" x="0" y="0" rx="14" ry="14" width="260" height="62"/>
+      <text class="node-l" x="130" y="38" text-anchor="middle">4. Components · Variants</text>
+    </g>
+    <g transform="translate(1720 628)">
+      <rect class="pill" x="0" y="0" rx="6" ry="6" width="180" height="24"/><text class="pill-t" x="12" y="16">Main + instance + overrides</text>
+      <rect class="pill" x="0" y="32" rx="6" ry="6" width="180" height="24"/><text class="pill-t" x="12" y="48">Ctrl+K create · Ctrl+Shift+K detach</text>
+      <rect class="pill" x="0" y="64" rx="6" ry="6" width="180" height="24"/><text class="pill-t" x="12" y="80">Variant = Properties × Values</text>
+      <rect class="pill" x="0" y="96" rx="6" ry="6" width="180" height="24"/><text class="pill-t" x="12" y="112">Overrides survive if name+type+depth match</text>
+      <rect class="pill" x="0" y="128" rx="6" ry="6" width="180" height="24"/><text class="pill-t" x="12" y="144">Name: function, not appearance</text>
+    </g>
+  </g>
+
+  <!-- 5. PROTOTYPING (bottom-right) -->
+  <g>
+    <path class="edge" d="M 1010 700 Q 1220 820 1440 960"/>
+    <g transform="translate(1360 960)">
+      <rect class="node proto" x="0" y="0" rx="14" ry="14" width="260" height="62"/>
+      <text class="node-l" x="130" y="38" text-anchor="middle">5. Prototyping · Flows</text>
+    </g>
+    <g transform="translate(1640 900)">
+      <rect class="pill" x="0" y="0" rx="6" ry="6" width="230" height="24"/><text class="pill-t" x="12" y="16">Triggers: click · enter · leave · delay</text>
+      <rect class="pill" x="0" y="32" rx="6" ry="6" width="230" height="24"/><text class="pill-t" x="12" y="48">Actions: Navigate · Overlay · Back · URL</text>
+      <rect class="pill" x="0" y="64" rx="6" ry="6" width="230" height="24"/><text class="pill-t" x="12" y="80">Animations: dissolve · slide · push</text>
+      <rect class="pill" x="0" y="96" rx="6" ry="6" width="230" height="24"/><text class="pill-t" x="12" y="112">Flows · multiple per file</text>
+      <rect class="pill" x="0" y="128" rx="6" ry="6" width="230" height="24"/><text class="pill-t" x="12" y="144">Fix-when-scrolling = sticky UI</text>
+      <rect class="pill" x="0" y="160" rx="6" ry="6" width="230" height="24"/><text class="pill-t" x="12" y="176">Modals = Overlay, not Navigate-to</text>
+    </g>
+  </g>
+
+  <!-- 6. TOKENS (bottom) -->
+  <g>
+    <path class="edge" d="M 960 750 L 960 960"/>
+    <g transform="translate(820 960)">
+      <rect class="node tokens" x="0" y="0" rx="14" ry="14" width="280" height="62"/>
+      <text class="node-l" x="140" y="38" text-anchor="middle">6. Design Tokens (W3C DTCG)</text>
+    </g>
+    <g transform="translate(820 1050)">
+      <rect class="pill" x="0" y="0" rx="6" ry="6" width="280" height="24"/><text class="pill-t" x="12" y="16">12 types · color, dim, spacing, type, radius…</text>
+      <rect class="pill" x="0" y="32" rx="6" ry="6" width="280" height="24"/><text class="pill-t" x="12" y="48">Aliases with {token.name}</text>
+      <rect class="pill" x="0" y="64" rx="6" ry="6" width="280" height="24"/><text class="pill-t" x="12" y="80">Math: + − × ÷ % ^ · abs/min/max/…</text>
+      <rect class="pill" x="0" y="96" rx="6" ry="6" width="280" height="24"/><text class="pill-t" x="12" y="112">Sets cascade · multidim themes</text>
+      <rect class="pill" x="0" y="128" rx="6" ry="6" width="280" height="24"/><text class="pill-t" x="12" y="144">3 tiers: Global → Semantic → Component</text>
+      <rect class="pill" x="0" y="160" rx="6" ry="6" width="280" height="24"/><text class="pill-t" x="12" y="176">Spacing tokens: flex layout only</text>
+    </g>
+  </g>
+
+  <!-- 7. PLUGIN API (bottom-left) -->
+  <g>
+    <path class="edge" d="M 910 700 Q 700 820 480 960"/>
+    <g transform="translate(300 960)">
+      <rect class="node api" x="0" y="0" rx="14" ry="14" width="260" height="62"/>
+      <text class="node-l" x="130" y="38" text-anchor="middle">7. Plugin API &amp; MCP</text>
+    </g>
+    <g transform="translate(60 900)">
+      <rect class="pill" x="0" y="0" rx="6" ry="6" width="230" height="24"/><text class="pill-t" x="12" y="16">@penpot/plugin-types (TS)</text>
+      <rect class="pill" x="0" y="32" rx="6" ry="6" width="230" height="24"/><text class="pill-t" x="12" y="48">createBoard/Rect/Text/Path…</text>
+      <rect class="pill" x="0" y="64" rx="6" ry="6" width="230" height="24"/><text class="pill-t" x="12" y="80">addFlexLayout · addGridLayout</text>
+      <rect class="pill" x="0" y="96" rx="6" ry="6" width="230" height="24"/><text class="pill-t" x="12" y="112">appendChild · resize · rotate</text>
+      <rect class="pill" x="0" y="128" rx="6" ry="6" width="230" height="24"/><text class="pill-t" x="12" y="144">applyToken · addInteraction</text>
+      <rect class="pill" x="0" y="160" rx="6" ry="6" width="230" height="24"/><text class="pill-t" x="12" y="176">MCP @ localhost:4401/mcp</text>
+      <rect class="pill" x="0" y="192" rx="6" ry="6" width="230" height="24"/><text class="pill-t" x="12" y="208">Tools: execute_code, overview…</text>
+    </g>
+  </g>
+
+  <!-- 8. FILE FORMAT (left) -->
+  <g>
+    <path class="edge" d="M 870 660 L 460 660"/>
+    <g transform="translate(200 628)">
+      <rect class="node format" x="0" y="0" rx="14" ry="14" width="260" height="62"/>
+      <text class="node-l" x="130" y="38" text-anchor="middle">8. File Format</text>
+    </g>
+    <g transform="translate(20 628)">
+      <rect class="pill" x="0" y="0" rx="6" ry="6" width="180" height="24"/><text class="pill-t" x="12" y="16">.penpot = ZIP</text>
+      <rect class="pill" x="0" y="32" rx="6" ry="6" width="180" height="24"/><text class="pill-t" x="12" y="48">JSON + binary assets</text>
+      <rect class="pill" x="0" y="64" rx="6" ry="6" width="180" height="24"/><text class="pill-t" x="12" y="80">File → Pages → ShapeTree</text>
+      <rect class="pill" x="0" y="96" rx="6" ry="6" width="180" height="24"/><text class="pill-t" x="12" y="112">Shape = SVG + Penpot meta</text>
+      <rect class="pill" x="0" y="128" rx="6" ry="6" width="180" height="24"/><text class="pill-t" x="12" y="144">Export PNG·SVG·PDF·.penpot</text>
+    </g>
+  </g>
+
+  <!-- 9. BEST PRACTICES (bottom) -->
+  <g>
+    <path class="edge" d="M 960 750 Q 960 1100 960 1180"/>
+    <g transform="translate(560 1180)">
+      <rect class="node best" x="0" y="0" rx="14" ry="14" width="800" height="72"/>
+      <text class="node-l" x="400" y="32" text-anchor="middle">9. Best Practices + Pitfalls → Checklist</text>
+      <text class="leaf-t" x="400" y="56" text-anchor="middle">
+        Name by function · cap nesting ≤ 4 · tokens for everything · no invisible spacers · overlap = absolute+zIndex · flow by feature
+      </text>
+    </g>
+  </g>
+
+  <!-- Legend -->
+  <g transform="translate(60 1220)">
+    <text class="legend" x="0" y="0">Colors = feature domains. Lines = derivation. Hub = Penpot core model. Rules in bottom panel keep pages laid out with no unintended overlap.</text>
+    <text class="legend" x="0" y="20">Exported SVG: drop onto a Penpot canvas to import as a single SvgRaw, or open in a browser. Source: penpot-helper-skill/exploration-map.svg</text>
+  </g>
+</svg>
